@@ -29,3 +29,12 @@ resnet18:
 
 # Otimizadores
 `Ainda em pesquisa..`
+
+# Camadas
+A quantidade de camadas utilizadas no processo de treinamento do modelo é suficiente, atualmente o modelo sofre de overfitthing, justamente aumentar a quantidade de camadas utilizadas piora essa condição. Estamos em um nível ideal para treinamento.
+
+# Testes Futuros
+- O modelo sobre de Overfitting, eval x teste em treino tem muita discrepância.
+- Testar resoluções maiores. Resize(320)/CenterCrop(288)
+- Adicionar RandomRotation e RandomErasing
+- Testar Label Smoothing (nn.CrossEntropyLoss(label_smoothing=0.1))
