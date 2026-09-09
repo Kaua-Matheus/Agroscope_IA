@@ -33,7 +33,6 @@ venv/
 .github/
 
 # Python
-lab.ipynb
 generalAI.ipynb
 
 # Annother
