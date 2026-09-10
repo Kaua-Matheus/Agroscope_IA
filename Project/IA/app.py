@@ -3,7 +3,7 @@ Para rodar a aplicação, você deve estar dentro da pasta /Project/IA
 """
 
 # FastAPI
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 import uvicorn
@@ -30,14 +30,20 @@ from dotenv import load_dotenv
 # Loading env
 if load_dotenv():
     print(".env loaded successfully.") # Apply logging
-    print(os.getenv("CORN"))
+    print(os.getenv("TOMATO"))
 else:
     raise("Couldn't load the .env")
 
 
+# Configuração
 # Application
 APP = FastAPI()
 
+# Device
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+# CORS
 origins = [
     "http://localhost:3000", # Atualizar CORS com .env
     "http://127.0.0.1:3000",
@@ -55,9 +61,6 @@ APP.add_middleware(
     allow_headers=["*"], # Change for security
 )
 
-# Device
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 """
 Por conta de usarmos um modelo pré-treinado, temos que então importa-lo e carregar a arquitetura.
@@ -65,19 +68,19 @@ Logo após, necessitamos introduzir os pesos próprios nos nós do modelo carreg
 """
 ## --- Models Loading --- ##
 # CNN
-## Generalist
-if  os.path.isfile(os.getenv("GENERALIST")):
-    GENERALIST, LOADED_GENERALIST = loadModel(os.getenv("GENERALIST"), device=DEVICE)
-    print("GENERALIST Model loaded successfully")
+## Generalist (Pode ser usado no futuro)
+# if  os.path.isfile(os.getenv("GENERALIST")):
+#     GENERALIST, LOADED_GENERALIST = loadModel(os.getenv("GENERALIST"), device=DEVICE)
+#     print("GENERALIST Model loaded successfully")
 
-
+print("Começando a carregar os modelos.")
 ## Experts
-if  os.path.isfile(os.getenv("CORN")) and \
+if  os.path.isfile(os.getenv("TOMATO")) and \
     os.path.isfile(os.getenv("WHEAT")) and \
     os.path.isfile(os.getenv("SOYBEAN")):
 
-    CORN, LOADED_CORN = loadModel(os.getenv("CORN"), device=DEVICE)
-    print("CORN Model loaded successfully")
+    TOMATO, LOADED_TOMATO = loadModel(os.getenv("TOMATO"), device=DEVICE)
+    print("TOMATO Model loaded successfully")
 
     WHEAT, LOADED_WHEAT = loadModel(os.getenv("WHEAT"), device=DEVICE)
     print("WHEAT Model loaded successfully")
@@ -112,48 +115,49 @@ def __preprocess_image(image_file: UploadFile):
         print(f"Error trying to manipulate the image: {e}")
 
 
-def __generalist_predict(image_tensor):
+# Pode ser usado no futuro
+# def __generalist_predict(image_tensor):
 
-    try:
-        with torch.no_grad():
+#     try:
+#         with torch.no_grad():
 
-            outputs = GENERALIST(image_tensor.to(DEVICE))
-            probabilities = F.softmax(outputs, dim=1)
-            predicted_class_idx = torch.argmax(probabilities, dim=1).item()
+#             outputs = GENERALIST(image_tensor.to(DEVICE))
+#             probabilities = F.softmax(outputs, dim=1)
+#             predicted_class_idx = torch.argmax(probabilities, dim=1).item()
 
-            confidence = probabilities[0][predicted_class_idx].item()
+#             confidence = probabilities[0][predicted_class_idx].item()
         
-        predicted_class = LOADED_GENERALIST["class_names"][predicted_class_idx]
+#         predicted_class = LOADED_GENERALIST["class_names"][predicted_class_idx]
 
-        all_probabilities = {
-            LOADED_GENERALIST["class_names"][i]: float(probabilities[0][i])
-            for i in range(len(LOADED_GENERALIST["class_names"]))
-        }
+#         all_probabilities = {
+#             LOADED_GENERALIST["class_names"][i]: float(probabilities[0][i])
+#             for i in range(len(LOADED_GENERALIST["class_names"]))
+#         }
         
-        return predicted_class, round(confidence * 100, 2), all_probabilities
+#         return predicted_class, round(confidence * 100, 2), all_probabilities
 
-    except Exception as e:
-        print(f"Error trying to predict: {e}")
+#     except Exception as e:
+#         print(f"Error trying to predict: {e}")
 
 
 def __expert_predict(image_tensor, type: str):
 
     try:
         match(type):
-            case "Corn": 
+            case "Tomato": 
                 with torch.no_grad():
 
-                    outputs = CORN(image_tensor.to(DEVICE))
+                    outputs = TOMATO(image_tensor.to(DEVICE))
                     probabilities = F.softmax(outputs, dim=1)
                     predicted_class_idx = torch.argmax(probabilities, dim=1).item()
 
                     confidence = probabilities[0][predicted_class_idx].item()
                 
-                predicted_class = LOADED_CORN["class_names"][predicted_class_idx]
+                predicted_class = LOADED_TOMATO["class_names"][predicted_class_idx]
 
                 all_probabilities = {
-                    LOADED_CORN["class_names"][i]: float(probabilities[0][i])
-                    for i in range(len(LOADED_CORN["class_names"]))
+                    LOADED_TOMATO["class_names"][i]: float(probabilities[0][i])
+                    for i in range(len(LOADED_TOMATO["class_names"]))
                 }
                 
                 return predicted_class, round(confidence * 100, 2), all_probabilities
@@ -203,14 +207,11 @@ def __expert_predict(image_tensor, type: str):
 @APP.get("/modelinfo")
 def ModelInfo():
     return {
-        "class_names": LOADED_GENERALIST["class_names"],
-        "num_classes": LOADED_GENERALIST["num_classes"],
-        "model_info": LOADED_GENERALIST["model_info"],
         "models": {
-            "corn": {
-                "class_names": LOADED_CORN["class_names"],
-                "num_classes": LOADED_CORN["num_classes"],
-                "model_info": LOADED_CORN["model_info"],
+            "tomato": {
+                "class_names": LOADED_TOMATO["class_names"],
+                "num_classes": LOADED_TOMATO["num_classes"],
+                "model_info": LOADED_TOMATO["model_info"],
             },
             "wheat": {
                 "class_names": LOADED_WHEAT["class_names"],
@@ -226,8 +227,8 @@ def ModelInfo():
     }
 
 ## Predict
-@APP.post("/predict")
-async def Predict( file: UploadFile = File(...) ):
+@APP.post("/predict/")
+async def Predict( c_type: str = Form(...), file: UploadFile = File(...) ):
     
     if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Only images are acceptable.")
@@ -238,18 +239,15 @@ async def Predict( file: UploadFile = File(...) ):
     
     await file.seek(0)
 
-
     image_tensor = __preprocess_image(image_file=file)
 
     # Prediction
-    generalist_prediction = __generalist_predict(image_tensor)
-
-    expert_prediction = __expert_predict(image_tensor, type=generalist_prediction[0])
+    expert_prediction = __expert_predict(image_tensor, type=c_type)
 
 
     return {
-        "plant_prediction": generalist_prediction[0].upper(), 
-        "plant_confidence": generalist_prediction[1],
+        "plant_prediction": "Teste Planta", 
+        "plant_confidence": "Teste Confiança",
         "expert": {
             "predict": expert_prediction[0].upper(), 
             "predict_confidence": expert_prediction[1],
