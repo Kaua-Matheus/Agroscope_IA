@@ -21,9 +21,6 @@ import torch
 from torchvision import transforms
 import torch.nn.functional as F
 
-# Numpy
-import numpy as np
-
 from dotenv import load_dotenv
 
 
@@ -227,8 +224,8 @@ def ModelInfo():
     }
 
 ## Predict
-@APP.post("/predict/")
-async def Predict( c_type: str = Form(...), file: UploadFile = File(...) ):
+@APP.post("/predict")
+async def Predict( culture: str = Form(...), file: UploadFile = File(...) ):
     
     if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Only images are acceptable.")
@@ -242,12 +239,11 @@ async def Predict( c_type: str = Form(...), file: UploadFile = File(...) ):
     image_tensor = __preprocess_image(image_file=file)
 
     # Prediction
-    expert_prediction = __expert_predict(image_tensor, type=c_type)
+    expert_prediction = __expert_predict(image_tensor, type=culture)
 
 
     return {
-        "plant_prediction": "Teste Planta", 
-        "plant_confidence": "Teste Confiança",
+        "culture": culture,
         "expert": {
             "predict": expert_prediction[0].upper(), 
             "predict_confidence": expert_prediction[1],
