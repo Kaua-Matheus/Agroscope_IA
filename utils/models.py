@@ -1,31 +1,74 @@
+import random
+
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+from PIL import Image, ImageOps
 
 from enum import Enum
+
+from utils.leaf import LeafCrop
+
+MEAN = [0.485, 0.456, 0.406]
+STD = [0.229, 0.224, 0.225]
+
 
 class TransformType(Enum):
     TRAIN = "train"
     EVAL = "eval"
 
 
-def Get_Transform(type: TransformType):
+class RandomRot90:
+    """Rotaciona 0/90/180/270 graus — folha não tem orientação 'certa' na foto."""
+    def __call__(self, img):
+        return img.rotate(90 * random.randint(0, 3), expand=True)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
+
+
+def Pil_Loader(path :str, max_side :int=1024) -> Image.Image:
+    """
+        Loader para o ImageFolder. Em JPEG grande (fotos de 3000px) usa o modo draft,
+        que decodifica já reduzido — bem mais rápido. Também aplica a rotação do EXIF.
+    """
+    with open(path, "rb") as f:
+        img = Image.open(f)
+        img.draft("RGB", (max_side, max_side))
+        img = ImageOps.exif_transpose(img)
+        return img.convert("RGB")
+
+
+def Get_Transform(type: TransformType, size :int=224):
+    """
+        TRAIN e EVAL começam com LeafCrop: em fotos de folha inteira sobre fundo claro
+        a folha é recortada antes do resize (em close-ups não faz nada).
+        EVAL usa Resize((size, size)) em vez de Resize(256) + CenterCrop(224): o CenterCrop
+        descartava as bordas da imagem e, numa folha alongada, cortava as pontas.
+    """
     if type == TransformType.TRAIN:
         return transforms.Compose([
-            transforms.Resize(256),
-            transforms.RandomResizedCrop(224, scale=(0.85, 1.0)),
-            transforms.RandomHorizontalFlip(0.5),
+            LeafCrop(),
+            RandomRot90(),
+            transforms.RandomResizedCrop(size, scale=(0.35, 1.0), ratio=(0.5, 2.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.ColorJitter(0.3, 0.3, 0.3, 0.03),
+            # Blur em todas as classes: no dataset base a Rust é mais borrada (imagens 128px ampliadas),
+            # sem isso o modelo pode aprender "borrado = Rust"
+            transforms.RandomApply([transforms.GaussianBlur(9, sigma=(0.1, 2.5))], p=0.3),
             transforms.ToTensor(),
-            transforms.Normalize([0.485,0.456,0.406], [0.229,0.224,0.225]),
+            transforms.Normalize(MEAN, STD),
+            # Apaga pedaços aleatórios: força o modelo a usar a folha toda, não um único ponto
+            transforms.RandomErasing(p=0.25, scale=(0.02, 0.15)),
         ])
     elif type == TransformType.EVAL:
-        
         return transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            LeafCrop(),
+            transforms.Resize((size, size)),
             transforms.ToTensor(),
-            transforms.Normalize([0.485,0.456,0.406], [0.229,0.224,0.225]),
-    ])
+            transforms.Normalize(MEAN, STD),
+        ])
 
 
     
