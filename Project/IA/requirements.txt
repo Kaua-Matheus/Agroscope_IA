@@ -1,15 +1,14 @@
 # API
 fastapi[standard]
 uvicorn
+python-multipart
+python-dotenv
 
 # Tensor and Model
 torch
-torchaudio
 torchvision
 
 # Image
 pillow
-
-# Data Manipulation
 numpy
-opencv-python
+opencv-python-headless

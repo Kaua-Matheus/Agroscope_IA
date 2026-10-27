@@ -1,255 +1,213 @@
 """
 Para rodar a aplicação, você deve estar dentro da pasta /Project/IA
+
+    python app.py
+
+Fluxo do /predict:
+    foto -> leitura (EXIF, redução) -> triagem (é folha? qualidade ok?) -> especialista da cultura -> resposta
+
+Configuração (.env):
+    COFFEE, SOYBEAN, WHEAT, TOMATO, CORN   caminhos dos especialistas (cultura sem caminho é ignorada)
+    GATE                                   caminho do modelo de triagem (opcional)
+    CORS_ORIGINS                           origens separadas por vírgula
+    MAX_UPLOAD_MB (8), API_HOST (0.0.0.0), API_PORT (5000)
+    REVIEW_THRESHOLD (0.6), CONFIDENT_THRESHOLD (0.8), GATE_NOT_LEAF_THRESHOLD (0.5), GATE_POOR_THRESHOLD (0.5)
 """
 
-# FastAPI
-from fastapi import FastAPI, Form, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-
-import uvicorn
-
-# Scripts auxiliares
-from imports import loadModel
-
-# System
+import datetime as dt
+import logging
 import os
-import io
-from PIL import Image
+import time
+from contextlib import asynccontextmanager
 
-# Torch
 import torch
-from torchvision import transforms
-import torch.nn.functional as F
-
+import uvicorn
 from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
+from core.gate import Gate
+from core.imaging import InvalidImage, Load_Image
+from core.registry import Registry
 
-# Loading env
+API_VERSION = "2.0"
+
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(name)s: %(message)s")
+log = logging.getLogger("agroscope")
+
 if load_dotenv():
-    print(".env loaded successfully.") # Apply logging
-    print(os.getenv("TOMATO"))
+    log.info(".env carregado")
 else:
-    raise("Couldn't load the .env")
+    log.warning(".env não encontrado; usando apenas variáveis de ambiente")
 
-
-# Configuração
-# Application
-APP = FastAPI()
-
-# Device
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MAX_UPLOAD_BYTES = int(float(os.getenv("MAX_UPLOAD_MB", "8")) * 1024 * 1024)
+
+REJECTION_MESSAGES = {
+    "not_leaf": "A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+    "low_quality": "A imagem não tem qualidade suficiente para análise. Tire outra foto com boa luz, sem tremer e com a folha em foco.",
+}
+
+STATE = {}
 
 
-# CORS
-origins = [
-    "http://localhost:3000", # Atualizar CORS com .env
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+@asynccontextmanager
+async def lifespan(app :FastAPI):
+    """Carrega os modelos uma única vez, na subida da API."""
+    log.info("Carregando modelos em %s...", DEVICE)
+    STATE["registry"] = Registry(
+        DEVICE,
+        review_threshold=float(os.getenv("REVIEW_THRESHOLD", "0.6")),
+        confident_threshold=float(os.getenv("CONFIDENT_THRESHOLD", "0.8")),
+    )
+    if not STATE["registry"].experts:
+        raise RuntimeError("Nenhum modelo especialista foi carregado. Verifique COFFEE/SOYBEAN/WHEAT/TOMATO/CORN no .env")
 
-print(f"Origens: {origins}")
+    gate_path = os.getenv("GATE")
+    if gate_path and not os.path.isfile(gate_path):
+        log.warning("GATE não encontrado (%s); triagem só por regras simples", gate_path)
+        gate_path = None
+    STATE["gate"] = Gate(
+        gate_path, DEVICE,
+        not_leaf_threshold=float(os.getenv("GATE_NOT_LEAF_THRESHOLD", "0.5")),
+        poor_threshold=float(os.getenv("GATE_POOR_THRESHOLD", "0.5")),
+    )
+    log.info("Culturas: %s | triagem: %s", list(STATE["registry"].experts), "modelo" if STATE["gate"].enabled else "regras")
+    yield
+    STATE.clear()
+
+
+APP = FastAPI(title="Agroscope IA", version=API_VERSION, lifespan=lifespan)
+
+origins = [o.strip() for o in os.getenv(
+    "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173"
+).split(",") if o.strip()]
 
 APP.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
-    allow_headers=["*"], # Change for security
+    allow_headers=["*"],
 )
 
 
-"""
-Por conta de usarmos um modelo pré-treinado, temos que então importa-lo e carregar a arquitetura.
-Logo após, necessitamos introduzir os pesos próprios nos nós do modelo carregado e então o modelo estará pronto para uso.
-"""
-## --- Models Loading --- ##
-# CNN
-## Generalist (Pode ser usado no futuro)
-# if  os.path.isfile(os.getenv("GENERALIST")):
-#     GENERALIST, LOADED_GENERALIST = loadModel(os.getenv("GENERALIST"), device=DEVICE)
-#     print("GENERALIST Model loaded successfully")
-
-print("Começando a carregar os modelos.")
-## Experts
-if  os.path.isfile(os.getenv("TOMATO")) and \
-    os.path.isfile(os.getenv("WHEAT")) and \
-    os.path.isfile(os.getenv("SOYBEAN")):
-
-    TOMATO, LOADED_TOMATO = loadModel(os.getenv("TOMATO"), device=DEVICE)
-    print("TOMATO Model loaded successfully")
-
-    WHEAT, LOADED_WHEAT = loadModel(os.getenv("WHEAT"), device=DEVICE)
-    print("WHEAT Model loaded successfully")
-
-    SOYBEAN, LOADED_SOYBEAN = loadModel(os.getenv("SOYBEAN"), device=DEVICE)
-    print("SOYBEAN Model loaded successfully")
-
-else:
-    raise FileNotFoundError("couldn't identify some of the experts in models archive")
-
-
-# Transform - Apply models.Get_Transform
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485,0.456,0.406], [0.229,0.224,0.225]),
-])
-
-
-# Defs
-def __preprocess_image(image_file: UploadFile):
-    try:
-        # Tratamento Imagem
-        image_data = image_file.file.read()    
-        image = Image.open(io.BytesIO(image_data)).convert("RGB")
-
-        image_tensor = transform(image).unsqueeze(0)
-        return image_tensor
-
-    except Exception as e:
-        print(f"Error trying to manipulate the image: {e}")
-
-
-# Pode ser usado no futuro
-# def __generalist_predict(image_tensor):
-
-#     try:
-#         with torch.no_grad():
-
-#             outputs = GENERALIST(image_tensor.to(DEVICE))
-#             probabilities = F.softmax(outputs, dim=1)
-#             predicted_class_idx = torch.argmax(probabilities, dim=1).item()
-
-#             confidence = probabilities[0][predicted_class_idx].item()
-        
-#         predicted_class = LOADED_GENERALIST["class_names"][predicted_class_idx]
-
-#         all_probabilities = {
-#             LOADED_GENERALIST["class_names"][i]: float(probabilities[0][i])
-#             for i in range(len(LOADED_GENERALIST["class_names"]))
-#         }
-        
-#         return predicted_class, round(confidence * 100, 2), all_probabilities
-
-#     except Exception as e:
-#         print(f"Error trying to predict: {e}")
-
-
-def __expert_predict(image_tensor, type: str):
-
-    try:
-        match(type):
-            case "Tomato": 
-                with torch.no_grad():
-
-                    outputs = TOMATO(image_tensor.to(DEVICE))
-                    probabilities = F.softmax(outputs, dim=1)
-                    predicted_class_idx = torch.argmax(probabilities, dim=1).item()
-
-                    confidence = probabilities[0][predicted_class_idx].item()
-                
-                predicted_class = LOADED_TOMATO["class_names"][predicted_class_idx]
-
-                all_probabilities = {
-                    LOADED_TOMATO["class_names"][i]: float(probabilities[0][i])
-                    for i in range(len(LOADED_TOMATO["class_names"]))
-                }
-                
-                return predicted_class, round(confidence * 100, 2), all_probabilities
-            
-            case "Wheat": 
-                with torch.no_grad():
-
-                    outputs = WHEAT(image_tensor.to(DEVICE))
-                    probabilities = F.softmax(outputs, dim=1)
-                    predicted_class_idx = torch.argmax(probabilities, dim=1).item()
-
-                    confidence = probabilities[0][predicted_class_idx].item()
-                
-                predicted_class = LOADED_WHEAT["class_names"][predicted_class_idx]
-
-                all_probabilities = {
-                    LOADED_WHEAT["class_names"][i]: float(probabilities[0][i])
-                    for i in range(len(LOADED_WHEAT["class_names"]))
-                }
-                
-                return predicted_class, round(confidence * 100, 2), all_probabilities
-            
-            case "Soybean": 
-                with torch.no_grad():
-
-                    outputs = SOYBEAN(image_tensor.to(DEVICE))
-                    probabilities = F.softmax(outputs, dim=1)
-                    predicted_class_idx = torch.argmax(probabilities, dim=1).item()
-
-                    confidence = probabilities[0][predicted_class_idx].item()
-                
-                predicted_class = LOADED_SOYBEAN["class_names"][predicted_class_idx]
-
-                all_probabilities = {
-                    LOADED_SOYBEAN["class_names"][i]: float(probabilities[0][i])
-                    for i in range(len(LOADED_SOYBEAN["class_names"]))
-                }
-                
-                return predicted_class, round(confidence * 100, 2), all_probabilities
-
-    except Exception as e:
-        print(f"Error trying to predict: {e}")
-
-
 # Routes
-## Debug
+## Debug / informações
+@APP.get("/health")
+def Health():
+    registry, gate = STATE["registry"], STATE["gate"]
+    return {
+        "status": "ok",
+        "api_version": API_VERSION,
+        "device": DEVICE.type,
+        "cultures": list(registry.experts),
+        "gate": gate.enabled,
+    }
+
+
+@APP.get("/cultures")
+def Cultures():
+    registry = STATE["registry"]
+    return {
+        "cultures": [e.describe() for e in registry.experts.values()],
+        "unavailable": registry.skipped,
+        "gate": STATE["gate"].describe(),
+    }
+
+
 @APP.get("/modelinfo")
 def ModelInfo():
+    """Mantido por compatibilidade com o front antigo."""
     return {
         "models": {
-            "tomato": {
-                "class_names": LOADED_TOMATO["class_names"],
-                "num_classes": LOADED_TOMATO["num_classes"],
-                "model_info": LOADED_TOMATO["model_info"],
-            },
-            "wheat": {
-                "class_names": LOADED_WHEAT["class_names"],
-                "num_classes": LOADED_WHEAT["num_classes"],
-                "model_info": LOADED_WHEAT["model_info"],
-            },
-            "soybean": {
-                "class_names": LOADED_SOYBEAN["class_names"],
-                "num_classes": LOADED_SOYBEAN["num_classes"],
-                "model_info": LOADED_SOYBEAN["model_info"],
+            key: {
+                "class_names": e.classes,
+                "num_classes": len(e.classes),
+                "model_info": e.info,
             }
+            for key, e in STATE["registry"].experts.items()
         },
     }
 
+
 ## Predict
+def _run_prediction(data :bytes, culture_key :str, explain :bool, force :bool):
+    t0 = time.perf_counter()
+    up = Load_Image(data)
+    gate = STATE["gate"].check(up)
+
+    if gate["verdict"] == "not_leaf" or (gate["verdict"] == "low_quality" and not force):
+        return None, gate, up, t0
+
+    diagnosis = STATE["registry"].experts[culture_key].predict(up, explain=explain)
+    if gate["verdict"] == "low_quality":  # force=True: analisa mesmo assim, mas marca para revisão
+        diagnosis["status"] = "review"
+        diagnosis["review_reasons"].append("qualidade da imagem")
+    return diagnosis, gate, up, t0
+
+
 @APP.post("/predict")
-async def Predict( culture: str = Form(...), file: UploadFile = File(...) ):
-    
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(400, "Only images are acceptable.")
+async def Predict(
+    culture: str = Form(...),
+    file: UploadFile = File(...),
+    explain: bool = Form(False),   # inclui o mapa de calor (Grad-CAM) em base64
+    force: bool = Form(False),     # analisa mesmo com qualidade baixa (nunca se não for folha)
+):
+    registry = STATE["registry"]
+    culture_key = registry.resolve(culture)
+    if culture_key is None:
+        raise HTTPException(400, {"message": f"Cultura '{culture}' não disponível.", "available": list(registry.experts)})
 
-    contents = await file.read()
-    if len(contents) > 8 * 1024 * 1024:
-        raise HTTPException(400, "File too large.")
-    
-    await file.seek(0)
+    if file.content_type and not (file.content_type.startswith("image/") or file.content_type == "application/octet-stream"):
+        raise HTTPException(415, "Only images are acceptable.")
 
-    image_tensor = __preprocess_image(image_file=file)
+    data = await file.read()
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"File too large (máx. {MAX_UPLOAD_BYTES // (1024 * 1024)} MB).")
+    if not data:
+        raise HTTPException(400, "Arquivo vazio.")
 
-    # Prediction
-    expert_prediction = __expert_predict(image_tensor, type=culture)
+    try:
+        diagnosis, gate, up, t0 = await run_in_threadpool(_run_prediction, data, culture_key, explain, force)
+    except InvalidImage as e:
+        raise HTTPException(415, str(e))
 
+    image_info = {"width": up.original_size[0], "height": up.original_size[1], "format": up.format, "taken_at": up.taken_at}
+    metadata = {
+        "api_version": API_VERSION,
+        "processed_at": dt.datetime.now().isoformat(timespec="seconds"),
+        "device": DEVICE.type,
+        "latency_ms": round((time.perf_counter() - t0) * 1000, 1),
+    }
+
+    if diagnosis is None:
+        return JSONResponse(status_code=422, content={
+            "status": "rejected",
+            "reason": gate["verdict"],
+            "message": REJECTION_MESSAGES[gate["verdict"]],
+            "culture": culture_key,
+            "gate": gate,
+            "image": image_info,
+            "metadata": metadata,
+        })
 
     return {
-        "culture": culture,
+        "status": "ok",
+        "culture": culture_key,
+        # Campos antigos, mantidos para o front atual continuar funcionando
         "expert": {
-            "predict": expert_prediction[0].upper(), 
-            "predict_confidence": expert_prediction[1],
-        }
-        }
+            "predict": diagnosis["predicted_class"].upper(),
+            "predict_confidence": round(diagnosis["confidence"] * 100, 2),
+        },
+        "diagnosis": diagnosis,
+        "gate": gate,
+        "image": image_info,
+        "metadata": metadata,
+    }
 
 
 if __name__ == '__main__':
-    uvicorn.run(APP, host='0.0.0.0', port=5000)
+    uvicorn.run(APP, host=os.getenv("API_HOST", "0.0.0.0"), port=int(os.getenv("API_PORT", "5000")))

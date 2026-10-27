@@ -41,3 +41,5 @@ generalAI.ipynb
 /ImgTest
 /Project/Models
 /Project/IA/models
+# Fixtures dos testes da API
+!Project/IA/tests/fixtures/*.jpg
