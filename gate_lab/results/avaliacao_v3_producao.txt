@@ -1,0 +1,48 @@
+== Folha x não-folha (imagens limpas) ==
+grupo                  n |   modelo | heur. cor | heur. bbox | especialista
+   (para folhas: % aceitas como folha; para não-folhas: % rejeitadas)
+coffee_test          315 |   100.0% |     61.9% |      98.1% |        98.1%
+soy_test             306 |   100.0% |    100.0% |      77.5% |        78.1%
+tomato_test          200 |   100.0% |     94.0% |      97.0% |        67.5%
+coffee_field         150 |   100.0% |    100.0% |      83.3% |        50.7%
+wheat_unseen         650 |    99.2% |     99.5% |      73.2% |        51.4%
+objects_unseen      1082 |   100.0% |     57.8% |      27.8% |        75.3%
+background           237 |    99.2% |     63.7% |      30.8% |        79.7%
+plants_not_leaf      415 |    97.3% |     25.5% |      20.0% |        64.3%
+wheat_root_grain     553 |     0.0% |      4.2% |      19.9% |        46.5%
+AUROC modelo (p_not_leaf): 1.0000
+AUROC heurística de cor: 0.8711
+AUROC certeza do especialista: 0.7855
+
+== Qualidade: % de folhas marcadas como "imagem ruim" ==
+   (níveis 0-2 deveriam passar; nível 3 deveria ser barrado; "noise" nunca foi visto no treino)
+degradação    esperado | modelo: recusa total | heurística
+limpa           passar |                 0.8% |       6.0%
+gauss_1         passar |                 0.8% |      95.8%
+gauss_2         passar |                 3.0% |     100.0%
+gauss_3         barrar |                89.2% |     100.0%
+motion_1        passar |                 1.2% |      79.8%
+motion_2        barrar |                84.8% |      92.5%
+motion_3        barrar |               100.0% |      98.0%
+dark_1          passar |                 1.0% |      99.8%
+dark_2          passar |                 1.0% |     100.0%
+dark_3         ambíguo |                 2.2% |     100.0%
+bright_1        barrar |                90.5% |      25.5%
+bright_2        barrar |               100.0% |      58.0%
+bright_3        barrar |               100.0% |      84.2%
+lowres_1        passar |                 0.8% |      90.0%
+lowres_2        passar |                 2.8% |     100.0%
+lowres_3        barrar |                97.5% |     100.0%
+jpeg_1          passar |                 3.0% |       7.2%
+jpeg_2          barrar |                97.8% |       5.0%
+jpeg_3          barrar |               100.0% |       1.2%
+noise_1         passar |                 2.5% |       0.0%
+noise_2         barrar |                90.8% |       0.0%
+noise_3         barrar |               100.0% |       0.0%
+RESUMO modelo: recusa indevida (deveria passar) 1.6% | recusa correta (deveria barrar) 95.5% | ruído (nunca visto): barrar 95.4%, passar indevidamente recusado 2.5%
+RESUMO heurística: recusa indevida (deveria passar) 75.4% | recusa correta (deveria barrar) 62.7% | ruído (nunca visto): barrar 0.0%, passar indevidamente recusado 0.0%
+
+Negativos sintéticos (300): 100.0% como não-folha | 0.0% recusados como qualidade ou aceitos: aceitos=0.0%
+latência cuda: 9.1 ms
+latência cpu: 22.0 ms
+parâmetros: 4.21 M | arquivo (fp32): 16.0 MB

@@ -85,6 +85,18 @@ Foto da folha  →  Recorte da folha  →  Modelo de IA  →  Resultado
 
 **Resposta: não.** Melhor do que criar imagens artificiais é parar de descartar fotos reais: usando todas as fotos da soja o acerto subiu de ~98,4% para ~99,7%. Detalhes em [Balanceamento de classes](#balanceamento-de-classes-smote).
 
+### Out/2026 — Triagem de imagens e atualização da aplicação
+
+**Pergunta:** como evitar que fotos que não são de folha, ou de qualidade ruim, recebam um diagnóstico?
+
+**O que foi feito:**
+- Criado um modelo pequeno de triagem que roda antes do especialista: diz se a foto é de folha e se tem qualidade para análise.
+- A aplicação (`Main/Project/IA`) foi atualizada: recorte da folha, triagem, respostas detalhadas, suporte a modelos antigos e novos, e 31 testes de casos de uso.
+
+**Resultado:** 100% das não-folhas recusadas; 95% das fotos inviáveis barradas; só 1,6% das fotos boas recusadas por engano. Detalhes em [Triagem da imagem](#triagem-da-imagem-folha--não-folha-e-qualidade).
+
+**Decisão:** a triagem fica ativa na aplicação. A foto escura não é mais motivo de recusa (medimos que não atrapalha o diagnóstico).
+
 ---
 
 ## Estudos e decisões
@@ -117,6 +129,37 @@ Foto da folha  →  Recorte da folha  →  Modelo de IA  →  Resultado
 | EfficientNet-B0 | 98,4% | **99,0%** |
 
 A melhora apareceu em todas as tentativas, e a classe menor não foi prejudicada. **Decisão sugerida:** trocar o descarte de fotos pela amostragem ponderada no notebook.
+
+### Triagem da imagem (folha / não-folha e qualidade)
+
+**Pergunta:** vale ter um modelo só para barrar fotos que não são de folha ou que estão ruins demais, antes do diagnóstico?
+
+**Resposta: sim.** Sem triagem, qualquer foto (um documento, o céu, uma parede) recebe um diagnóstico de doença — o especialista sempre escolhe uma das classes que conhece.
+
+**Como "imagem ruim" foi definida:** em vez de chutar limites, medimos quanto cada defeito derruba o acerto dos especialistas de café e soja. Só é recusado o que derruba **5 pontos ou mais**:
+
+| Defeito | Leve | Moderado | Severo |
+|---|---|---|---|
+| Desfoque | passa | passa | recusa |
+| Foto tremida | passa | recusa | recusa |
+| Foto escura | passa | passa | passa (não atrapalha!) |
+| Foto estourada (clara demais) | recusa | recusa | recusa |
+| Resolução baixa | passa | passa | recusa |
+| Compressão (ex.: reenviada por mensageiro) | passa | recusa | recusa |
+| Ruído (granulado) | passa | recusa | recusa |
+
+**Resultado (modelo de 16 MB, ~22 ms por foto em CPU):**
+
+| | Modelo de triagem | Regras simples (cor/nitidez) | Certeza do especialista |
+|---|---|---|---|
+| Folhas reais aceitas | 99–100% | 62–100% | 51–98% |
+| Objetos e fundos recusados (categorias nunca vistas) | 99–100% | 58–64% | 75–80% |
+| Fotos boas recusadas por engano | **1,6%** | 75% | — |
+| Fotos ruins barradas | **95%** | 63% | — |
+
+- Folhas de uma **cultura que o modelo nunca viu** (trigo, em um teste à parte) foram aceitas em 88,5% dos casos. Ao adicionar uma cultura nova, inclua fotos dela no treino da triagem.
+- **A triagem não confere se a folha é da cultura escolhida.** Uma folha de café enviada como "tomate" passa e recebe um diagnóstico de tomate.
+- Detalhes e como refazer: [`gate_lab/`](gate_lab/README.md).
 
 ### Cruzar com dados de clima e localização
 
@@ -167,7 +210,8 @@ Pontos de atenção:
 | `yolo_lab.ipynb` | Experimentos com YOLO (detecção de folhas) |
 | `utils/models.py` | Preparação das imagens para treino e teste |
 | `utils/leaf.py` | Recorte automático da folha |
-| `utils/inference.py` | Uso do modelo na aplicação: devolve o diagnóstico completo (certeza, status, qualidade da foto, mapa de atenção) |
+| `utils/inference.py` | Versão de laboratório do diagnóstico completo (a aplicação usa a sua própria cópia em `Main/Project/IA/core/`) |
+| `gate_lab/` | Experimento e treino do modelo de triagem (folha / não-folha / qualidade) |
 | `Models/Saved/Expert/` | Modelos treinados, um por cultura (não vai para o Git) |
 | `.env` | Caminhos das pastas de dados e do modelo (não vai para o Git) |
 
@@ -177,14 +221,16 @@ Pontos de atenção:
 
 - **Fotos de campo** (folha no pé, fundo com outras folhas e terra) ainda são o ponto fraco: no café, cerca de 75–80% de acerto, contra ~98% nas fotos com fundo claro. A solução é **juntar mais fotos de campo** para o treino.
 - **O teste externo do café** vem quase todo de uma mesma sessão de fotos. Um resultado de 98% aqui não garante o mesmo em outras fazendas.
-- **A aplicação (`Main/Project/IA/app.py`) ainda usa o preparo de imagem antigo** e só devolve classe + certeza. Precisa ser atualizada para usar `utils/inference.py`.
-- **Trigo, tomate e milho** ainda não foram retreinados com o método novo.
+- **Trigo, tomate e milho** ainda não foram retreinados com o método novo (a aplicação usa os modelos antigos com o preparo antigo).
+- **A triagem não confere a cultura**: uma folha de outra planta é diagnosticada como se fosse da cultura escolhida.
 
 ---
 
 ## Próximos passos
 
-- [ ] Atualizar a aplicação para usar `utils/inference.py`.
+- [x] Atualizar a aplicação para o pipeline novo (out/2026, com triagem e testes de uso).
+- [ ] Ajustar o front para mostrar as recusas da triagem e os avisos (ver `Main/README.md`).
+- [ ] Verificar a cultura da folha (ex.: incluir a cultura como saída da triagem).
 - [ ] Trocar o descarte de fotos pela amostragem ponderada (ver [Balanceamento](#balanceamento-de-classes-smote)).
 - [ ] Guardar uma cópia reduzida das fotos de treino. As fotos da soja têm 12–20 megapixels e o treino passa a maior parte do tempo só abrindo arquivos do HD (placa de vídeo a ~6% de uso). Reduzir as fotos uma vez antes de treinar deixa o treino várias vezes mais rápido.
 - [ ] Retreinar trigo, tomate e milho com o método novo e preencher a tabela de culturas.

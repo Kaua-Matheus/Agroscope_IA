@@ -40,3 +40,6 @@ generalAI.ipynb
 /ImgTest
 /Models
 /Treinamento
+# Cache e modelos do laboratório de triagem
+gate_lab/cache/
+gate_lab/*.pth
