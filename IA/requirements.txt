@@ -1,0 +1,14 @@
+# API
+fastapi[standard]
+uvicorn
+python-multipart
+python-dotenv
+
+# Tensor and Model
+torch
+torchvision
+
+# Image
+pillow
+numpy
+opencv-python-headless
