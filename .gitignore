@@ -39,7 +39,7 @@ generalAI.ipynb
 # Annother
 /OldProject
 /ImgTest
-/IA/Models
-/IA/models
+/Models
+/models
 # Fixtures dos testes da API
 !Project/IA/tests/fixtures/*.jpg

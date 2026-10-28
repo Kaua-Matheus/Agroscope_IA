@@ -3,20 +3,14 @@ torch
 torchaudio
 torchvision
 
-pillow
-
 # Data Manipulation
 numpy
-pandas
-
-# Transform Jetter
 opencv-python
-
-# Metrics
-scikit-learn
 
 # Data View and Dashboards
 matplotlib
 
-# Env
+# API
+fastapi[standard]
+uvicorn
 python-dotenv
