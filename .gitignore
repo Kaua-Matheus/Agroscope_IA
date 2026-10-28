@@ -42,4 +42,4 @@ generalAI.ipynb
 /Models
 /models
 # Fixtures dos testes da API
-/tests/fixtures/*.jpg
+!/tests/fixtures/*.jpg

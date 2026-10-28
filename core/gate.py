@@ -7,12 +7,11 @@
 import threading
 import time
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 
-from core.expert import Build_Model, MEAN, STD
+from core import nets
 from core.imaging import UploadedImage, Quality_Metrics
 
 MIN_SIDE_PX = 128  # abaixo disso não há detalhe suficiente de lesão
@@ -29,16 +28,14 @@ class Gate:
         self.info = {}
         self._lock = threading.Lock()
         if path:
-            ck = torch.load(path, map_location="cpu", weights_only=False)
-            self.info = ck.get("model_info", {})
+            self.net, ck = nets.load_model(path, "mobilenet_v3_large", device)
+            self.info = ck["model_info"]
             self.classes = list(ck["class_names"])
-            assert self.classes == ["leaf_ok", "leaf_poor", "not_leaf"], f"Classes inesperadas no GATE: {self.classes}"
-            self.net = Build_Model(self.info.get("architecture", "mobilenet_v3_large"), 3)
-            self.net.load_state_dict(ck["model_state_dict"])
-            self.net.to(device).eval()
+            if self.classes != ["leaf_ok", "leaf_poor", "not_leaf"]:
+                raise ValueError(f"Classes inesperadas no GATE: {self.classes}")
             size = int(self.info.get("img_size", 224))
             self.transform = transforms.Compose([
-                transforms.Resize((size, size)), transforms.ToTensor(), transforms.Normalize(MEAN, STD),
+                transforms.Resize((size, size)), transforms.ToTensor(), transforms.Normalize(nets.MEAN, nets.STD),
             ])
             with torch.no_grad():
                 self.net(torch.zeros(1, 3, size, size, device=device))  # warm-up

@@ -41,7 +41,7 @@ class Registry:
         self.experts :dict[str, ExpertModel] = {}
         self.skipped :dict[str, str] = {}
         for key, (env, _) in CULTURES.items():
-            path = os.getenv(env)
+            path = (os.getenv(env) or "").strip().strip("'\"")  # docker --env-file não remove aspas
             if not path:
                 self.skipped[key] = f"variável {env} não definida"
                 continue

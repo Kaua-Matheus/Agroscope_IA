@@ -13,31 +13,15 @@ import time
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
-from torchvision import models, transforms
+from torchvision import transforms
 
+from core import nets
 from core.imaging import UploadedImage
 from core.leaf import Leaf_BBox
 
-MEAN = [0.485, 0.456, 0.406]
-STD = [0.229, 0.224, 0.225]
-
-
-def Build_Model(arch :str, num_classes :int) -> nn.Module:
-    if arch == "convnext_tiny":
-        net = models.convnext_tiny(weights=None)
-        net.classifier[2] = nn.Linear(net.classifier[2].in_features, num_classes)
-    elif arch == "efficientnet_b0":
-        net = models.efficientnet_b0(weights=None)
-        net.classifier[1] = nn.Linear(net.classifier[1].in_features, num_classes)
-    elif arch == "mobilenet_v3_large":
-        net = models.mobilenet_v3_large(weights=None)
-        net.classifier[3] = nn.Linear(net.classifier[3].in_features, num_classes)
-    else:
-        raise ValueError(f"Arquitetura não suportada: {arch}")
-    return net
+MEAN, STD = nets.MEAN, nets.STD
 
 
 def _entropy(p :np.ndarray) -> float:
@@ -49,8 +33,8 @@ def _entropy(p :np.ndarray) -> float:
 class ExpertModel:
     def __init__(self, culture :str, path :str, device :torch.device, review_threshold :float=0.6,
                  confident_threshold :float=0.8):
-        ck = torch.load(path, map_location="cpu", weights_only=False)
-        info = ck.get("model_info", {}) or {}
+        self.net, ck = nets.load_model(path, "convnext_tiny", device)
+        info = ck["model_info"]
         self.culture = culture
         self.path = path
         self.classes = list(ck["class_names"])
@@ -63,10 +47,6 @@ class ExpertModel:
         self.review_threshold = review_threshold
         self.confident_threshold = confident_threshold
         self._lock = threading.Lock()  # hooks do Grad-CAM não podem rodar em paralelo no mesmo modelo
-
-        self.net = Build_Model(self.arch, len(self.classes))
-        self.net.load_state_dict(ck["model_state_dict"])
-        self.net.to(device).eval()
 
         if self.legacy:
             self.transform = transforms.Compose([

@@ -1,16 +1,11 @@
-# Tensor and Model
-torch
-torchaudio
-torchvision
-
-# Data Manipulation
-numpy
-opencv-python
-
-# Data View and Dashboards
-matplotlib
-
 # API
-fastapi[standard]
-uvicorn
+fastapi[standard]        # inclui uvicorn e python-multipart (upload de arquivos)
 python-dotenv
+
+# Modelos
+torch
+torchvision              # traz também o pillow
+
+# Imagem
+numpy
+opencv-python-headless   # versão sem interface gráfica: funciona em servidor/Docker

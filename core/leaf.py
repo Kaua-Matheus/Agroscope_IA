@@ -40,18 +40,3 @@ def Leaf_BBox(pil :Image.Image, work :int=512, min_frac :float=0.01, max_frac :f
     x0, y0 = max(0, x - m), max(0, y - m)
     x1, y1 = min(mask.shape[1], x + bw + m), min(mask.shape[0], y + bh + m)
     return int(x0 / s), int(y0 / s), int(x1 / s), int(y1 / s)
-
-
-class LeafCrop:
-    """
-        Transform (PIL -> PIL) que recorta a folha antes do Resize.
-        Sem isso, em fotos de folha inteira sobre fundo branco a folha vira uma faixa
-        estreita no centro da imagem de 224px e o modelo só "enxerga" o centro.
-        Em close-ups (folha ocupando a imagem toda) não faz nada.
-    """
-    def __call__(self, img :Image.Image) -> Image.Image:
-        bbox = Leaf_BBox(img)
-        return img if bbox is None else img.crop(bbox)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}()"

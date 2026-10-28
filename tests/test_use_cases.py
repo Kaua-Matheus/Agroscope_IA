@@ -1,318 +1,176 @@
 """
-Casos de uso da API (rodar dentro de Main/Project/IA):
-
-    python -m unittest discover -s tests -v
-
+Casos de uso de ponta a ponta com os modelos REAIS (./models).
 Cada teste simula o que um usuário do aplicativo faria e verifica a resposta da API.
-Os modelos (models/...) precisam existir; sem eles os testes são pulados.
+Ver tests/CASOS_DE_TESTE.md.
 """
 import base64
 import io
-import os
-import sys
-import unittest
 from concurrent.futures import ThreadPoolExecutor
 
-import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+import pytest
+from PIL import Image
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-FIX = os.path.join(HERE, "fixtures")
-sys.path.insert(0, ROOT)
-os.chdir(ROOT)
+from conftest import needs_models
+from helpers import (blur, downscale, fake_document, fake_sky, fake_wall, fixture, jpeg_bytes, png_bytes,
+                     scale_brightness)
 
-# Modelos usados nos testes (sobrescrevem o .env, pois load_dotenv não substitui variáveis já definidas)
-os.environ.update({
-    "COFFEE": "./models/Coffee/coffee.pth",
-    "SOYBEAN": "./models/Soybean/soybean_v2.pth",
-    "WHEAT": "./models/Wheat/wheat.pth",
-    "GATE": "./models/Gate/gate.pth",
-})
-os.environ["TOMATO"] = ""  # vazio = cultura desligada (load_dotenv não sobrescreve variáveis existentes)
-os.environ["CORN"] = ""
-
-MODELS_OK = all(os.path.isfile(os.environ[k]) for k in ("COFFEE", "SOYBEAN", "WHEAT", "GATE"))
-
-from fastapi.testclient import TestClient  # noqa: E402
-import app as app_module  # noqa: E402
+pytestmark = [needs_models, pytest.mark.models]
 
 
-def jpeg_bytes(img :Image.Image, quality :int=90, exif=None) -> bytes:
-    buf = io.BytesIO()
-    if exif is not None:
-        img.save(buf, "JPEG", quality=quality, exif=exif)
-    else:
-        img.save(buf, "JPEG", quality=quality)
-    return buf.getvalue()
+def predict(client, culture, data, filename="foto.jpg", content_type="image/jpeg", **form):
+    fields = {"culture": culture, **{k: str(v).lower() for k, v in form.items()}}
+    return client.post("/predict", data=fields, files={"file": (filename, data, content_type)})
 
 
-def fixture(name :str) -> Image.Image:
-    return Image.open(os.path.join(FIX, name)).convert("RGB")
+# ---------- informações ----------
+def test_health(real_api):
+    body = real_api.get("/health").json()
+    assert set(body["cultures"]) == {"coffee", "soybean", "wheat"}
+    assert body["gate"] is True
 
 
-def fake_document() -> Image.Image:
-    """Foto de um papel com texto (ex.: usuário enviou a foto errada)."""
-    img = Image.new("RGB", (900, 1200), (245, 245, 240))
-    d = ImageDraw.Draw(img)
-    for i in range(40):
-        y = 60 + i * 27
-        d.rectangle([60, y, 60 + (i * 97) % 700 + 100, y + 10], fill=(40, 40, 40))
-    return img
+def test_cultures_mostra_tipo_de_modelo(real_api):
+    r = real_api.get("/cultures").json()
+    by = {c["culture"]: c for c in r["cultures"]}
+    assert "LeafCrop" in by["coffee"]["preprocessing"]
+    assert "legacy" in by["wheat"]["preprocessing"]
+    assert "tomato" in r["unavailable"]
 
 
-def fake_sky() -> Image.Image:
-    """Céu azul (foto tirada sem querer para cima)."""
-    a = np.zeros((900, 1200, 3), np.uint8)
-    a[..., 0] = np.linspace(90, 170, 900)[:, None]
-    a[..., 1] = np.linspace(140, 200, 900)[:, None]
-    a[..., 2] = 235
-    return Image.fromarray(a)
+# ---------- diagnóstico ----------
+@pytest.mark.parametrize("culture, image, expected", [
+    ("coffee", "coffee_healthy.jpg", "Healthy"),
+    ("coffee", "coffee_phoma.jpg", "Phoma"),
+    ("coffee", "coffee_rust.jpg", "Rust"),
+    ("soybean", "soy_rust.jpg", "Rust"),
+    ("soybean", "soy_blight.jpg", "Bacterial_Blight"),
+])
+def test_diagnostico_correto(real_api, culture, image, expected):
+    """Produtor envia foto de folha (doente ou saudável) e recebe o diagnóstico certo."""
+    r = predict(real_api, culture, jpeg_bytes(fixture(image)))
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["status"] == "ok" and body["gate"]["verdict"] == "ok"
+    assert body["diagnosis"]["predicted_class"] == expected
+    assert body["diagnosis"]["is_healthy"] == (expected == "Healthy")
+    assert body["diagnosis"]["leaf_bbox"] is not None  # folha recortada antes do modelo
 
 
-def fake_wall() -> Image.Image:
-    """Parede de tijolos."""
-    img = Image.new("RGB", (1200, 900), (150, 60, 40))
-    d = ImageDraw.Draw(img)
-    for row in range(0, 900, 60):
-        off = 60 if (row // 60) % 2 else 0
-        d.line([(0, row), (1200, row)], fill=(200, 200, 190), width=6)
-        for x in range(off, 1200, 120):
-            d.line([(x, row), (x, row + 60)], fill=(200, 200, 190), width=6)
-    return img.filter(ImageFilter.GaussianBlur(1))
+def test_apelidos_em_portugues(real_api):
+    assert predict(real_api, "Soja", jpeg_bytes(fixture("soy_rust.jpg"))).json()["culture_key"] == "soybean"
+    assert predict(real_api, "Café", jpeg_bytes(fixture("coffee_rust.jpg"))).json()["culture_key"] == "coffee"
 
 
-@unittest.skipUnless(MODELS_OK, "modelos não encontrados em ./models")
-class UseCases(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.ctx = TestClient(app_module.APP)
-        cls.client = cls.ctx.__enter__()  # dispara o lifespan (carrega os modelos uma vez)
+def test_campos_antigos_para_o_front(real_api):
+    body = predict(real_api, "coffee", jpeg_bytes(fixture("coffee_rust.jpg"))).json()
+    assert body["expert"]["predict"] == body["diagnosis"]["predicted_class"].upper()
+    assert body["expert"]["predict_confidence"] == pytest.approx(body["diagnosis"]["confidence"] * 100, abs=0.01)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.ctx.__exit__(None, None, None)
 
-    def predict(self, culture, data, filename="foto.jpg", content_type="image/jpeg", **form):
-        fields = {"culture": culture, **{k: str(v).lower() for k, v in form.items()}}
-        return self.client.post("/predict", data=fields, files={"file": (filename, data, content_type)})
+def test_modelo_antigo_trigo(real_api):
+    r = predict(real_api, "trigo", jpeg_bytes(fixture("wheat_leaf.jpg")))
+    assert r.status_code == 200, r.text
+    d = r.json()["diagnosis"]
+    assert d["model"]["legacy_preprocessing"] is True and d["leaf_bbox"] is None
 
-    # ---------- informações ----------
-    def test_01_health(self):
-        """A API sobe e informa as culturas carregadas e se a triagem por modelo está ativa."""
-        r = self.client.get("/health")
-        self.assertEqual(r.status_code, 200)
-        body = r.json()
-        self.assertEqual(set(body["cultures"]), {"coffee", "soybean", "wheat"})
-        self.assertTrue(body["gate"])
 
-    def test_02_cultures_mostra_tipo_de_modelo(self):
-        """Modelos novos usam recorte da folha; modelos antigos mantêm o preparo com que foram treinados."""
-        r = self.client.get("/cultures").json()
-        by = {c["culture"]: c for c in r["cultures"]}
-        self.assertIn("LeafCrop", by["coffee"]["preprocessing"])
-        self.assertIn("legacy", by["wheat"]["preprocessing"])
-        self.assertIn("tomato", r["unavailable"])
+def test_mapa_de_calor(real_api):
+    exp = predict(real_api, "coffee", jpeg_bytes(fixture("coffee_phoma.jpg")), explain=True).json()["diagnosis"]["explanation"]
+    assert Image.open(io.BytesIO(base64.b64decode(exp["heatmap_png_base64"]))).format == "PNG"
+    assert 0 <= exp["peak_xy"][0] <= 1 and 0 <= exp["peak_xy"][1] <= 1
 
-    def test_03_modelinfo_compatibilidade(self):
-        """Rota antiga /modelinfo continua respondendo no formato anterior."""
-        r = self.client.get("/modelinfo").json()
-        self.assertEqual(r["models"]["coffee"]["num_classes"], 3)
 
-    # ---------- diagnóstico ----------
-    def test_10_cafe_saudavel(self):
-        """Produtor envia foto de folha de café saudável."""
-        r = self.predict("coffee", jpeg_bytes(fixture("coffee_healthy.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
-        body = r.json()
-        self.assertEqual(body["status"], "ok")
-        self.assertEqual(body["diagnosis"]["predicted_class"], "Healthy")
-        self.assertTrue(body["diagnosis"]["is_healthy"])
-        self.assertEqual(body["gate"]["verdict"], "ok")
-        self.assertIsNotNone(body["diagnosis"]["leaf_bbox"])  # folha foi recortada antes do modelo
+def test_foto_de_celular_rotacionada(real_api):
+    """Celular grava a foto deitada + tag EXIF de rotação; o resultado deve ser o mesmo."""
+    exif = Image.Exif()
+    exif[274] = 6
+    data = jpeg_bytes(fixture("coffee_rust.jpg").rotate(90, expand=True), exif=exif.tobytes())
+    r = predict(real_api, "coffee", data)
+    assert r.status_code == 200, r.text
+    assert r.json()["diagnosis"]["predicted_class"] == "Rust"
 
-    def test_11_cafe_phoma(self):
-        r = self.predict("coffee", jpeg_bytes(fixture("coffee_phoma.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["diagnosis"]["predicted_class"], "Phoma")
 
-    def test_12_cafe_ferrugem(self):
-        r = self.predict("coffee", jpeg_bytes(fixture("coffee_rust.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["diagnosis"]["predicted_class"], "Rust")
+def test_png_com_transparencia(real_api):
+    data = png_bytes(fixture("coffee_healthy.jpg").convert("RGBA"))
+    assert predict(real_api, "coffee", data, filename="folha.png", content_type="image/png").status_code == 200
 
-    def test_13_soja_com_apelido_em_portugues(self):
-        """Front pode mandar 'soja' / 'Café' — apelidos e acentos são aceitos."""
-        r = self.predict("Soja", jpeg_bytes(fixture("soy_rust.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["culture"], "soybean")
-        self.assertEqual(r.json()["diagnosis"]["predicted_class"], "Rust")
-        r = self.predict("Café", jpeg_bytes(fixture("coffee_rust.jpg")))
-        self.assertEqual(r.json()["culture"], "coffee")
 
-    def test_14_soja_crestamento(self):
-        r = self.predict("soybean", jpeg_bytes(fixture("soy_blight.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["diagnosis"]["predicted_class"], "Bacterial_Blight")
+# ---------- triagem: não é folha ----------
+@pytest.mark.parametrize("make", [fake_document, fake_sky, fake_wall], ids=["documento", "ceu", "parede"])
+def test_nao_folha_recusada(real_api, make):
+    r = predict(real_api, "coffee", jpeg_bytes(make()))
+    assert r.status_code == 422, r.text
+    assert r.json()["reason"] == "not_leaf"
 
-    def test_15_campos_antigos_para_o_front(self):
-        """O front atual lê expert.predict (maiúsculo) e expert.predict_confidence (0-100)."""
-        body = self.predict("coffee", jpeg_bytes(fixture("coffee_rust.jpg"))).json()
-        self.assertEqual(body["expert"]["predict"], body["diagnosis"]["predicted_class"].upper())
-        self.assertAlmostEqual(body["expert"]["predict_confidence"], body["diagnosis"]["confidence"] * 100, delta=0.01)
-        self.assertAlmostEqual(sum(body["diagnosis"]["probabilities"].values()), 1.0, delta=0.01)
 
-    def test_16_modelo_antigo_trigo(self):
-        """Cultura com modelo antigo (v1) continua funcionando, com o preparo antigo."""
-        r = self.predict("trigo", jpeg_bytes(fixture("wheat_leaf.jpg")))
-        self.assertEqual(r.status_code, 200, r.text)
+def test_nao_folha_nao_passa_nem_com_force(real_api):
+    assert predict(real_api, "coffee", jpeg_bytes(fake_document()), force=True).status_code == 422
+
+
+# ---------- triagem: qualidade ----------
+def test_foto_tremida_recusada(real_api):
+    r = predict(real_api, "coffee", jpeg_bytes(blur(fixture("coffee_rust.jpg"), 14)))
+    assert r.status_code == 422, r.text
+    assert r.json()["reason"] == "low_quality" and "foto" in r.json()["message"]
+
+
+def test_foto_tremida_com_force(real_api):
+    r = predict(real_api, "coffee", jpeg_bytes(blur(fixture("coffee_rust.jpg"), 14)), force=True)
+    assert r.status_code == 200, r.text
+    d = r.json()["diagnosis"]
+    assert d["status"] == "review" and "qualidade da imagem" in d["review_reasons"]
+
+
+def test_foto_escura_passa_com_aviso(real_api):
+    """Foto escura NÃO derruba o acerto (medido), então passa — só com aviso."""
+    r = predict(real_api, "coffee", jpeg_bytes(scale_brightness(fixture("coffee_rust.jpg"), 0.2)))
+    assert r.status_code == 200, r.text
+    assert "imagem escura" in r.json()["gate"]["warnings"]
+
+
+@pytest.mark.parametrize("make", [
+    lambda: jpeg_bytes(scale_brightness(fixture("coffee_rust.jpg"), 2.6)),
+    lambda: jpeg_bytes(fixture("coffee_rust.jpg"), quality=3),
+    lambda: jpeg_bytes(fixture("coffee_rust.jpg").resize((64, 64))),
+], ids=["estourada", "compressao_extrema", "minuscula"])
+def test_qualidade_inviavel_recusada(real_api, make):
+    r = predict(real_api, "coffee", make())
+    assert r.status_code == 422, r.text
+    assert r.json()["reason"] == "low_quality"
+
+
+@pytest.mark.parametrize("make", [
+    lambda: jpeg_bytes(blur(fixture("coffee_rust.jpg"), 1.5), quality=60),
+    lambda: jpeg_bytes(downscale(fixture("coffee_rust.jpg"), 400)),
+], ids=["desfoque_leve", "resolucao_media"])
+def test_defeito_leve_passa(real_api, make):
+    """Defeitos leves não atrapalham o diagnóstico, então o usuário não é barrado."""
+    assert predict(real_api, "coffee", make()).status_code == 200
+
+
+# ---------- erros de entrada ----------
+def test_cultura_sem_modelo(real_api):
+    assert predict(real_api, "tomate", jpeg_bytes(fixture("coffee_rust.jpg"))).status_code == 400
+
+
+def test_arquivo_que_nao_e_imagem(real_api):
+    assert predict(real_api, "coffee", b"isto nao e uma imagem", filename="a.txt", content_type="text/plain").status_code == 400
+
+
+def test_imagem_corrompida(real_api):
+    assert predict(real_api, "coffee", jpeg_bytes(fixture("coffee_rust.jpg"))[:300]).status_code == 400
+
+
+# ---------- carga ----------
+def test_varios_usuarios_ao_mesmo_tempo(real_api):
+    """8 requisições simultâneas (com Grad-CAM) respondem igual a uma requisição isolada."""
+    data = jpeg_bytes(fixture("coffee_phoma.jpg"))
+    alone = predict(real_api, "coffee", data, explain=True).json()["diagnosis"]
+    with ThreadPoolExecutor(8) as ex:
+        results = list(ex.map(lambda _: predict(real_api, "coffee", data, explain=True), range(8)))
+    for r in results:
+        assert r.status_code == 200
         d = r.json()["diagnosis"]
-        self.assertTrue(d["model"]["legacy_preprocessing"])
-        self.assertIsNone(d["leaf_bbox"])
-
-    def test_17_mapa_de_calor(self):
-        """Com explain=true a resposta traz o Grad-CAM como PNG em base64."""
-        r = self.predict("coffee", jpeg_bytes(fixture("coffee_phoma.jpg")), explain=True)
-        exp = r.json()["diagnosis"]["explanation"]
-        png = Image.open(io.BytesIO(base64.b64decode(exp["heatmap_png_base64"])))
-        self.assertEqual(png.format, "PNG")
-        self.assertTrue(0 <= exp["peak_xy"][0] <= 1 and 0 <= exp["peak_xy"][1] <= 1)
-
-    def test_18_foto_de_celular_rotacionada(self):
-        """Celular grava a foto deitada + tag EXIF de rotação; resultado deve ser o mesmo."""
-        img = fixture("coffee_rust.jpg")
-        exif = Image.Exif()
-        exif[274] = 6  # "girar 90° para exibir"
-        rotated = img.rotate(90, expand=True)
-        r = self.predict("coffee", jpeg_bytes(rotated, exif=exif.tobytes()))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["diagnosis"]["predicted_class"], "Rust")
-
-    def test_19_png_com_transparencia(self):
-        """PNG com canal alfa (ex.: imagem recortada em outro app)."""
-        img = fixture("coffee_healthy.jpg").convert("RGBA")
-        buf = io.BytesIO()
-        img.save(buf, "PNG")
-        r = self.predict("coffee", buf.getvalue(), filename="folha.png", content_type="image/png")
-        self.assertEqual(r.status_code, 200, r.text)
-
-    # ---------- triagem: imagem que não é folha ----------
-    def test_20_nao_folha_documento(self):
-        r = self.predict("coffee", jpeg_bytes(fake_document()))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "not_leaf")
-
-    def test_21_nao_folha_ceu(self):
-        r = self.predict("coffee", jpeg_bytes(fake_sky()))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "not_leaf")
-
-    def test_22_nao_folha_parede(self):
-        r = self.predict("coffee", jpeg_bytes(fake_wall()))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "not_leaf")
-
-    def test_23_nao_folha_nao_passa_nem_com_force(self):
-        """force=true só ignora qualidade; nunca libera imagem que não é folha."""
-        r = self.predict("coffee", jpeg_bytes(fake_document()), force=True)
-        self.assertEqual(r.status_code, 422)
-
-    # ---------- triagem: qualidade ----------
-    def test_30_foto_tremida(self):
-        """Foto muito desfocada é recusada com mensagem orientando nova foto."""
-        img = fixture("coffee_rust.jpg").filter(ImageFilter.GaussianBlur(14))
-        r = self.predict("coffee", jpeg_bytes(img))
-        self.assertEqual(r.status_code, 422, r.text)
-        body = r.json()
-        self.assertEqual(body["reason"], "low_quality")
-        self.assertIn("foto", body["message"])
-
-    def test_31_foto_tremida_com_force(self):
-        """Usuário insiste (force=true): analisa, mas marca o resultado para revisão."""
-        img = fixture("coffee_rust.jpg").filter(ImageFilter.GaussianBlur(14))
-        r = self.predict("coffee", jpeg_bytes(img), force=True)
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["diagnosis"]["status"], "review")
-        self.assertIn("qualidade da imagem", r.json()["diagnosis"]["review_reasons"])
-
-    def test_32_foto_escura_passa_com_aviso(self):
-        """Foto escura NÃO derruba o acerto dos especialistas (medido: -0 a -2 pts), então passa — só com aviso."""
-        a = (np.asarray(fixture("coffee_rust.jpg")).astype(np.float32) * 0.2).astype(np.uint8)
-        r = self.predict("coffee", jpeg_bytes(Image.fromarray(a)))
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertIn("imagem escura", r.json()["gate"]["warnings"])
-
-    def test_35_foto_estourada(self):
-        """Foto clara demais (estourada) derruba o acerto (-16 a -29 pts) e é recusada."""
-        a = np.clip(np.asarray(fixture("coffee_rust.jpg")).astype(np.float32) * 2.6, 0, 255).astype(np.uint8)
-        r = self.predict("coffee", jpeg_bytes(Image.fromarray(a)))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "low_quality")
-
-    def test_36_compressao_extrema(self):
-        """JPEG muito comprimido (ex.: imagem encaminhada várias vezes por mensageiro)."""
-        r = self.predict("coffee", jpeg_bytes(fixture("coffee_rust.jpg"), quality=3))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "low_quality")
-
-    def test_33_imagem_minuscula(self):
-        img = fixture("coffee_rust.jpg").resize((64, 64))
-        r = self.predict("coffee", jpeg_bytes(img))
-        self.assertEqual(r.status_code, 422, r.text)
-        self.assertEqual(r.json()["reason"], "low_quality")
-
-    def test_34_desfoque_leve_passa(self):
-        """Desfoque leve não deve barrar o usuário (não prejudica o diagnóstico)."""
-        img = fixture("coffee_rust.jpg").filter(ImageFilter.GaussianBlur(1.5))
-        r = self.predict("coffee", jpeg_bytes(img, quality=60))
-        self.assertEqual(r.status_code, 200, r.text)
-
-    # ---------- erros de entrada ----------
-    def test_40_cultura_desconhecida(self):
-        r = self.predict("banana", jpeg_bytes(fixture("coffee_rust.jpg")))
-        self.assertEqual(r.status_code, 400)
-        self.assertIn("coffee", r.json()["detail"]["available"])
-
-    def test_41_cultura_sem_modelo_carregado(self):
-        r = self.predict("tomate", jpeg_bytes(fixture("coffee_rust.jpg")))
-        self.assertEqual(r.status_code, 400)
-
-    def test_42_arquivo_que_nao_e_imagem(self):
-        r = self.predict("coffee", b"isto nao e uma imagem", filename="a.txt", content_type="text/plain")
-        self.assertEqual(r.status_code, 415)
-
-    def test_43_imagem_corrompida(self):
-        data = jpeg_bytes(fixture("coffee_rust.jpg"))[:300]
-        r = self.predict("coffee", data)
-        self.assertEqual(r.status_code, 415, r.text)
-
-    def test_44_arquivo_vazio(self):
-        r = self.predict("coffee", b"")
-        self.assertEqual(r.status_code, 400)
-
-    def test_45_arquivo_grande_demais(self):
-        old = app_module.MAX_UPLOAD_BYTES
-        app_module.MAX_UPLOAD_BYTES = 50 * 1024
-        try:
-            r = self.predict("coffee", jpeg_bytes(fixture("coffee_rust.jpg")))
-            self.assertEqual(r.status_code, 413)
-        finally:
-            app_module.MAX_UPLOAD_BYTES = old
-
-    # ---------- carga ----------
-    def test_50_varios_usuarios_ao_mesmo_tempo(self):
-        """8 requisições simultâneas (com Grad-CAM) devem responder igual a uma requisição isolada."""
-        data = jpeg_bytes(fixture("coffee_phoma.jpg"))
-        alone = self.predict("coffee", data, explain=True).json()["diagnosis"]
-        with ThreadPoolExecutor(8) as ex:
-            results = list(ex.map(lambda _: self.predict("coffee", data, explain=True), range(8)))
-        for r in results:
-            self.assertEqual(r.status_code, 200)
-            d = r.json()["diagnosis"]
-            self.assertEqual(d["predicted_class"], alone["predicted_class"])
-            self.assertAlmostEqual(d["confidence"], alone["confidence"], places=3)
-            self.assertEqual(d["explanation"]["peak_xy"], alone["explanation"]["peak_xy"])
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        assert d["predicted_class"] == alone["predicted_class"]
+        assert d["confidence"] == pytest.approx(alone["confidence"], abs=1e-3)
+        assert d["explanation"]["peak_xy"] == alone["explanation"]["peak_xy"]

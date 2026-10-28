@@ -1,0 +1,17 @@
+# Não vai para a imagem Docker
+.venv/
+.git/
+.github/
+__pycache__/
+tests/
+images/
+*.md
+.env
+pytest.ini
+requirements-dev.txt
+
+# Modelos que a API não usa
+models/General/
+models/Corn/corn_old.pth
+models/Tomato/tomato_v1.pth
+models/Soybean/soybean.pth
