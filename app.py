@@ -1,5 +1,5 @@
 """
-Para rodar a aplicação, você deve estar dentro da pasta /IA
+Para rodar a aplicação, você deve estar dentro da pasta /
 
     python app.py
 

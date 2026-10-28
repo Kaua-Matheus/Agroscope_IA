@@ -35,7 +35,7 @@ os.environ["CORN"] = ""
 MODELS_OK = all(os.path.isfile(os.environ[k]) for k in ("COFFEE", "SOYBEAN", "WHEAT", "GATE"))
 
 from fastapi.testclient import TestClient  # noqa: E402
-import Main.IA.app as app_module  # noqa: E402
+import app as app_module  # noqa: E402
 
 
 def jpeg_bytes(img :Image.Image, quality :int=90, exif=None) -> bytes:
