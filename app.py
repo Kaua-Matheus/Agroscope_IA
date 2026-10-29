@@ -98,7 +98,7 @@ def create_app(settings :Settings=None) -> FastAPI:
     def Cultures(request :Request):
         state = request.app.state
         return {
-            "cultures": [e.describe() for e in state.registry.experts.values()],
+            "cultures": state.registry.describe(),   # lido pelo backend para montar a lista de culturas
             "unavailable": state.registry.skipped,
             "gate": state.gate.describe(),
         }

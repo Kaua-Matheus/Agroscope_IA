@@ -4,6 +4,9 @@
     Cada cultura é configurada por uma variável de ambiente com o caminho do checkpoint
     (COFFEE, SOYBEAN, WHEAT, TOMATO, CORN). Cultura sem variável ou com arquivo ausente
     é apenas ignorada (com aviso no log), em vez de derrubar a aplicação.
+
+    Este é o único lugar onde as culturas são declaradas: o backend lê as disponíveis
+    em GET /cultures, e o front/app montam a lista a partir do backend.
 """
 import logging
 import os
@@ -16,12 +19,12 @@ from core.expert import ExpertModel
 log = logging.getLogger("agroscope")
 
 CULTURES = {
-    # chave interna: (variável de ambiente, apelidos aceitos na requisição)
-    "coffee":  ("COFFEE",  ["cafe", "café"]),
-    "soybean": ("SOYBEAN", ["soja", "soy"]),
-    "wheat":   ("WHEAT",   ["trigo"]),
-    "tomato":  ("TOMATO",  ["tomate"]),
-    "corn":    ("CORN",    ["milho", "maize"]),
+    # chave interna: (variável de ambiente, nome exibido ao usuário, apelidos aceitos na requisição)
+    "coffee":  ("COFFEE",  "Café",   ["cafe", "café"]),
+    "soybean": ("SOYBEAN", "Soja",   ["soja", "soy"]),
+    "wheat":   ("WHEAT",   "Trigo",  ["trigo"]),
+    "tomato":  ("TOMATO",  "Tomate", ["tomate"]),
+    "corn":    ("CORN",    "Milho",  ["milho", "maize"]),
 }
 
 
@@ -31,7 +34,7 @@ def _norm(text :str) -> str:
 
 
 ALIASES = {}
-for key, (_, aliases) in CULTURES.items():
+for key, (_, _, aliases) in CULTURES.items():
     for name in [key, *aliases]:
         ALIASES[_norm(name)] = key
 
@@ -40,7 +43,7 @@ class Registry:
     def __init__(self, device :torch.device, review_threshold :float=0.6, confident_threshold :float=0.8):
         self.experts :dict[str, ExpertModel] = {}
         self.skipped :dict[str, str] = {}
-        for key, (env, _) in CULTURES.items():
+        for key, (env, _, _) in CULTURES.items():
             path = (os.getenv(env) or "").strip().strip("'\"")  # docker --env-file não remove aspas
             if not path:
                 self.skipped[key] = f"variável {env} não definida"
@@ -51,6 +54,13 @@ class Registry:
                 continue
             self.experts[key] = ExpertModel(key, path, device, review_threshold, confident_threshold)
             log.info("Cultura %s carregada (%s, v%s)", key, path, self.experts[key].version)
+
+    def describe(self) -> list[dict]:
+        """Culturas carregadas, com o código e o nome que o backend/front usam."""
+        return [
+            {"code": key.upper(), "label": CULTURES[key][1], **expert.describe()}
+            for key, expert in self.experts.items()
+        ]
 
     def resolve(self, culture :str):
         """Nome enviado pelo front (ex.: 'Café', 'Soybean') -> chave interna, ou None."""

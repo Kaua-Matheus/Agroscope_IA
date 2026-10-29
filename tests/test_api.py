@@ -119,6 +119,32 @@ def test_cultures_reports_unavailable_and_preprocessing(fake_api):
     assert "legacy" in by["wheat"]["preprocessing"]      # modelo v1
 
 
+def test_cultures_expose_code_and_label_for_backend(fake_api):
+    """Contrato lido pelo backend (CropCatalog): code + label + classes de cada cultura carregada."""
+    by = {c["code"]: c for c in fake_api.get("/cultures").json()["cultures"]}
+    assert set(by) == {"COFFEE", "SOYBEAN", "TOMATO", "WHEAT"}
+    assert by["COFFEE"]["label"] == "Café" and by["SOYBEAN"]["label"] == "Soja"
+    assert by["WHEAT"]["classes"] == ["Healthy", "Diseased"]
+
+
+def test_new_culture_appears_when_its_model_is_configured(make_fake_api, tmp_path):
+    """Basta configurar a variável do modelo: a cultura aparece em /cultures e passa a ser aceita no /predict."""
+    from conftest import make_fake_checkpoint
+    corn = make_fake_checkpoint(tmp_path / "corn.pth", ["Healthy", "Rust_Common"], (0.1, 0.9), "1.0")
+    client = make_fake_api(env={"CORN": corn})
+
+    body = client.get("/cultures").json()
+    assert {"code": "CORN", "label": "Milho"}.items() <= next(c for c in body["cultures"] if c["code"] == "CORN").items()
+    assert "corn" not in body["unavailable"]
+    assert _post(client, culture="CORN").json()["culture_key"] == "corn"
+
+
+def test_predict_accepts_backend_codes(fake_api):
+    """O backend envia o `code` de /cultures (ex.: SOYBEAN) direto no campo culture."""
+    for code in ("COFFEE", "SOYBEAN", "TOMATO", "WHEAT"):
+        assert _post(fake_api, culture=code).status_code == 200, code
+
+
 # --- /predict: sucesso e formato ------------------------------------------
 
 def test_predict_accepts_valid_image(fake_api):

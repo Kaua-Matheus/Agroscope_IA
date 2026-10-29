@@ -7,7 +7,7 @@ Este documento lista o que é testado na API e nos modelos de IA, o resultado es
 ```bash
 pip install -r requirements-dev.txt
 
-pytest                 # padrão: API + casos de uso + comportamento da IA (~20 s, 139 testes)
+pytest                 # padrão: API + casos de uso + comportamento da IA (~20 s, 142 testes)
 pytest tests/test_api.py   # só a API com modelos falsos (~2 s; não precisa dos .pth)
 pytest -m dataset -s   # acerto nos conjuntos de teste completos do HD de dados (~5 min)
 ```
@@ -56,6 +56,9 @@ Usam redes minúsculas no lugar dos modelos reais, com resposta fixa (ex.: sempr
 | API-10 | `GET /modelinfo` | Formato antigo: `models.<cultura>.class_names` e `num_classes` |
 | API-11 | `GET /health` | Lista as culturas carregadas; `gate=false` quando não há modelo de triagem |
 | API-12 | `GET /cultures` | Mostra as culturas indisponíveis (ex.: milho sem modelo) e o tipo de preparo de cada uma (v2 = recorte da folha; v1 = legado) |
+| API-13 | `GET /cultures` (contrato lido pelo backend) | Cada cultura carregada traz `code` (ex.: `SOYBEAN`), `label` (ex.: `Soja`) e `classes` |
+| API-14 | Modelo de milho configurado (`CORN`) | Milho aparece em `/cultures` (`code=CORN`, `label=Milho`), sai de `unavailable` e passa a ser aceito no `/predict` — sem mudar código |
+| API-15 | `/predict` com o `code` vindo do backend (`COFFEE`, `SOYBEAN`, `TOMATO`, `WHEAT`) | 200 |
 
 ### 1.3 `/predict`: sucesso e formato da resposta
 | ID | Caso | Esperado |
