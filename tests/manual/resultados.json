@@ -1,0 +1,878 @@
+[
+ {
+  "id": "CT-IA-01",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,3%). Modelo: Healthy com 92,9%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.9289,
+   "Phoma": 0.0359,
+   "Rust": 0.0351
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9831,
+    "not_leaf": 0.0169,
+    "poor_quality": 0.0122
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1141.2,
+    "brightness": 135.1,
+    "width": 1920,
+    "height": 1280
+   },
+   "latency_ms": 55.3
+  }
+ },
+ {
+  "id": "CT-IA-02",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,1%). Modelo: Rust com 62,7%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0764,
+   "Phoma": 0.2964,
+   "Rust": 0.6272
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9811,
+    "not_leaf": 0.0189,
+    "poor_quality": 0.0094
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 82.4,
+    "brightness": 66.0,
+    "width": 1859,
+    "height": 1650
+   },
+   "latency_ms": 32.1
+  }
+ },
+ {
+  "id": "CT-IA-03",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,1%). Modelo: Rust com 90,5%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0463,
+   "Phoma": 0.0488,
+   "Rust": 0.9049
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9813,
+    "not_leaf": 0.0187,
+    "poor_quality": 0.0289
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 346.5,
+    "brightness": 96.1,
+    "width": 1024,
+    "height": 768
+   },
+   "latency_ms": 29.8
+  }
+ },
+ {
+  "id": "CT-IA-04",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 99,1%). Modelo: Healthy com 88,1%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Blight": 0.0479,
+   "Healthy": 0.881,
+   "Rust": 0.0712
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9906,
+    "not_leaf": 0.0094,
+    "poor_quality": 0.0108
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 794.9,
+    "brightness": 105.2,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 30.3
+  }
+ },
+ {
+  "id": "CT-IA-05",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,5%). Modelo: Rust com 89,9%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Blight": 0.0722,
+   "Healthy": 0.0288,
+   "Rust": 0.899
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9851,
+    "not_leaf": 0.0149,
+    "poor_quality": 0.0136
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1362.6,
+    "brightness": 131.0,
+    "width": 640,
+    "height": 480
+   },
+   "latency_ms": 22.7
+  }
+ },
+ {
+  "id": "CT-IA-06",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 96,5%). Modelo: Bacterial_Blight com 69,1%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Blight": 0.691,
+   "Healthy": 0.0859,
+   "Rust": 0.2232
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9652,
+    "not_leaf": 0.0348,
+    "poor_quality": 0.02
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 336.5,
+    "brightness": 112.3,
+    "width": 802,
+    "height": 1192
+   },
+   "latency_ms": 34.6
+  }
+ },
+ {
+  "id": "CT-IA-07",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 92,8%). Modelo: Healthy com 77,1%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Spot": 0.1001,
+   "Healthy": 0.7709,
+   "Leaf_Mold": 0.129
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9278,
+    "not_leaf": 0.0722,
+    "poor_quality": 0.3624
+   },
+   "reasons": [],
+   "warnings": [
+    "imagem possivelmente desfocada"
+   ],
+   "metrics": {
+    "sharpness": 50.8,
+    "brightness": 169.3,
+    "width": 563,
+    "height": 631
+   },
+   "latency_ms": 25.8
+  }
+ },
+ {
+  "id": "CT-IA-08",
+  "status": "Reprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 13,2%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.132,
+    "not_leaf": 0.868,
+    "poor_quality": 0.1016
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 698.9,
+    "brightness": 126.2,
+    "width": 350,
+    "height": 260
+   },
+   "latency_ms": 12.8
+  }
+ },
+ {
+  "id": "CT-IA-09",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,0%). Modelo: Leaf_Mold com 70,4%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Spot": 0.2228,
+   "Healthy": 0.073,
+   "Leaf_Mold": 0.7042
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9799,
+    "not_leaf": 0.0201,
+    "poor_quality": 0.0174
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 699.7,
+    "brightness": 112.9,
+    "width": 1024,
+    "height": 768
+   },
+   "latency_ms": 30.7
+  }
+ },
+ {
+  "id": "CT-IA-10",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,3%). Modelo: Healthy com 100,0%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Brown_Rust": 0.0002,
+   "Healthy": 0.9997,
+   "Yellow_Rust": 0.0002
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9831,
+    "not_leaf": 0.0169,
+    "poor_quality": 0.0455
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 4959.9,
+    "brightness": 118.4,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 31.4
+  }
+ },
+ {
+  "id": "CT-IA-11",
+  "status": "Reprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 44,0%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.4404,
+    "not_leaf": 0.5596,
+    "poor_quality": 0.6079
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 624.2,
+    "brightness": 126.5,
+    "width": 1920,
+    "height": 1385
+   },
+   "latency_ms": 44.1
+  }
+ },
+ {
+  "id": "CT-IA-12",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 88,7%). Modelo: Brown_Rust com 100,0%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Brown_Rust": 0.9998,
+   "Healthy": 0.0002,
+   "Yellow_Rust": 0.0001
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.8873,
+    "not_leaf": 0.1127,
+    "poor_quality": 0.0287
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1041.1,
+    "brightness": 120.6,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 30.4
+  }
+ },
+ {
+  "id": "CT-IA-13",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 97,8%). Modelo: Rust_Common com 45,8%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.2865,
+   "Rust_Blight": 0.2554,
+   "Rust_Common": 0.4582
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9777,
+    "not_leaf": 0.0223,
+    "poor_quality": 0.0841
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 180.5,
+    "brightness": 88.3,
+    "width": 766,
+    "height": 1024
+   },
+   "latency_ms": 30.6
+  }
+ },
+ {
+  "id": "CT-IA-14",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 99,1%). Modelo: Rust_Common com 96,2%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0139,
+   "Rust_Blight": 0.0244,
+   "Rust_Common": 0.9617
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.991,
+    "not_leaf": 0.009,
+    "poor_quality": 0.0118
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1018.2,
+    "brightness": 95.0,
+    "width": 1024,
+    "height": 1024
+   },
+   "latency_ms": 36.7
+  }
+ },
+ {
+  "id": "CT-IA-15",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,4%). Modelo: Rust_Common com 98,6%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0042,
+   "Rust_Blight": 0.0101,
+   "Rust_Common": 0.9857
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9844,
+    "not_leaf": 0.0156,
+    "poor_quality": 0.0117
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 464.9,
+    "brightness": 106.8,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 30.1
+  }
+ },
+ {
+  "id": "CT-IA-16",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,1%). Modelo: Bacterial_Blight com 69,3%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Blight": 0.6932,
+   "Healthy": 0.0274,
+   "Rust": 0.2794
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9813,
+    "not_leaf": 0.0187,
+    "poor_quality": 0.0289
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 346.5,
+    "brightness": 96.1,
+    "width": 1024,
+    "height": 768
+   },
+   "latency_ms": 30.2
+  }
+ },
+ {
+  "id": "CT-IA-17",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 99,1%). Modelo: Brown_Rust com 100,0%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Brown_Rust": 0.9997,
+   "Healthy": 0.0002,
+   "Yellow_Rust": 0.0
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.991,
+    "not_leaf": 0.009,
+    "poor_quality": 0.0118
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1018.2,
+    "brightness": 95.0,
+    "width": 1024,
+    "height": 1024
+   },
+   "latency_ms": 37.5
+  }
+ },
+ {
+  "id": "CT-IA-18",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 92,8%). Modelo: Rust_Common com 85,9%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0982,
+   "Rust_Blight": 0.0425,
+   "Rust_Common": 0.8593
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9278,
+    "not_leaf": 0.0722,
+    "poor_quality": 0.3624
+   },
+   "reasons": [],
+   "warnings": [
+    "imagem possivelmente desfocada"
+   ],
+   "metrics": {
+    "sharpness": 50.8,
+    "brightness": 169.3,
+    "width": 563,
+    "height": 631
+   },
+   "latency_ms": 25.3
+  }
+ },
+ {
+  "id": "CT-IA-19",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,3%). Modelo: Leaf_Mold com 93,2%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Spot": 0.027,
+   "Healthy": 0.0408,
+   "Leaf_Mold": 0.9322
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9833,
+    "not_leaf": 0.0167,
+    "poor_quality": 0.0152
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 405.7,
+    "brightness": 121.6,
+    "width": 750,
+    "height": 499
+   },
+   "latency_ms": 22.9
+  }
+ },
+ {
+  "id": "CT-IA-20",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 87,1%). Modelo: Rust_Common com 99,3%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.0024,
+   "Rust_Blight": 0.0045,
+   "Rust_Common": 0.9931
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.8707,
+    "not_leaf": 0.1293,
+    "poor_quality": 0.08
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 569.7,
+    "brightness": 120.4,
+    "width": 420,
+    "height": 378
+   },
+   "latency_ms": 14.9
+  }
+ },
+ {
+  "id": "CT-IA-21",
+  "status": "Aprovado",
+  "obtido": "Triagem aceitou (folha: 98,8%). Modelo: Rust com 56,3%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.2977,
+   "Phoma": 0.1391,
+   "Rust": 0.5632
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9881,
+    "not_leaf": 0.0119,
+    "poor_quality": 0.0084
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 455.3,
+    "brightness": 132.9,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 31.0
+  }
+ },
+ {
+  "id": "CT-IA-22",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,4%). Modelo: Healthy com 93,2%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Bacterial_Blight": 0.0253,
+   "Healthy": 0.9323,
+   "Rust": 0.0424
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9835,
+    "not_leaf": 0.0165,
+    "poor_quality": 0.0164
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 616.5,
+    "brightness": 140.9,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 31.3
+  }
+ },
+ {
+  "id": "CT-IA-23",
+  "status": "Aprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 4,2%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.0419,
+    "not_leaf": 0.9581,
+    "poor_quality": 0.395
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 200.3,
+    "brightness": 133.8,
+    "width": 1920,
+    "height": 2560
+   },
+   "latency_ms": 38.1
+  }
+ },
+ {
+  "id": "CT-IA-24",
+  "status": "Aprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 1,9%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.0195,
+    "not_leaf": 0.9805,
+    "poor_quality": 0.4557
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 315.8,
+    "brightness": 139.0,
+    "width": 1920,
+    "height": 1920
+   },
+   "latency_ms": 59.3
+  }
+ },
+ {
+  "id": "CT-IA-25",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 96,8%). Modelo: Brown_Rust com 93,2%. Cliente vê o diagnóstico.",
+  "http": 200,
+  "probabilidades": {
+   "Brown_Rust": 0.9317,
+   "Healthy": 0.0631,
+   "Yellow_Rust": 0.0052
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9682,
+    "not_leaf": 0.0318,
+    "poor_quality": 0.0153
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 105.6,
+    "brightness": 119.0,
+    "width": 768,
+    "height": 1024
+   },
+   "latency_ms": 30.7
+  }
+ },
+ {
+  "id": "CT-IA-26",
+  "status": "Aprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 15,3%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.1534,
+    "not_leaf": 0.8466,
+    "poor_quality": 0.0617
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 1831.5,
+    "brightness": 135.0,
+    "width": 1920,
+    "height": 2560
+   },
+   "latency_ms": 38.5
+  }
+ },
+ {
+  "id": "CT-IA-27",
+  "status": "Aprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 19,2%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.1916,
+    "not_leaf": 0.8084,
+    "poor_quality": 0.8155
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 8891.1,
+    "brightness": 122.9,
+    "width": 1920,
+    "height": 1440
+   },
+   "latency_ms": 48.8
+  }
+ },
+ {
+  "id": "CT-IA-28",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 98,9%). Modelo: Rust com 76,3%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.1339,
+   "Phoma": 0.1025,
+   "Rust": 0.7635
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9888,
+    "not_leaf": 0.0112,
+    "poor_quality": 0.0228
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 146.6,
+    "brightness": 56.4,
+    "width": 1024,
+    "height": 683
+   },
+   "latency_ms": 29.8
+  }
+ },
+ {
+  "id": "CT-IA-29",
+  "status": "Aprovado",
+  "obtido": "Recusada na triagem (not_leaf; folha: 19,2%). Mensagem: A imagem não parece ser de uma folha. Envie uma foto de uma folha da planta.",
+  "http": 422,
+  "probabilidades": null,
+  "gate": {
+   "verdict": "not_leaf",
+   "usable": false,
+   "method": "model",
+   "scores": {
+    "leaf": 0.1925,
+    "not_leaf": 0.8075,
+    "poor_quality": 0.1378
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 4993.3,
+    "brightness": 118.5,
+    "width": 576,
+    "height": 1024
+   },
+   "latency_ms": 25.2
+  }
+ },
+ {
+  "id": "CT-IA-30",
+  "status": "Reprovado",
+  "obtido": "Triagem aceitou (folha: 97,9%). Modelo: Healthy com 60,5%. Abaixo de 80%: backend pede nova foto.",
+  "http": 200,
+  "probabilidades": {
+   "Healthy": 0.6053,
+   "Phoma": 0.0422,
+   "Rust": 0.3525
+  },
+  "gate": {
+   "verdict": "ok",
+   "usable": true,
+   "method": "model",
+   "scores": {
+    "leaf": 0.9787,
+    "not_leaf": 0.0213,
+    "poor_quality": 0.1004
+   },
+   "reasons": [],
+   "warnings": [],
+   "metrics": {
+    "sharpness": 739.0,
+    "brightness": 148.6,
+    "width": 1024,
+    "height": 464
+   },
+   "latency_ms": 22.8
+  }
+ }
+]

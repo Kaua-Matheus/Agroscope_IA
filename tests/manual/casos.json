@@ -1,0 +1,632 @@
+[
+ {
+  "id": "CT-IA-01",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se folha de café saudável é reconhecida como saudável",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha de café saudável, foto aproximada"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-01_cafe_saudavel.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "COFFEE",
+  "classe_esperada": "Healthy",
+  "imagem": "Café/Healthy/CT-IA-01_cafe_saudavel.jpg"
+ },
+ {
+  "id": "CT-IA-02",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a mancha de Phoma no café",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha de café com Phoma"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-02_cafe_phoma.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Phoma com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "COFFEE",
+  "classe_esperada": "Phoma",
+  "imagem": "Café/Phoma/CT-IA-02_cafe_phoma.jpg"
+ },
+ {
+  "id": "CT-IA-03",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem do cafeeiro",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha de café com ferrugem (Hemileia vastatrix), foto de celular"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-03_cafe_ferrugem.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Rust com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "COFFEE",
+  "classe_esperada": "Rust",
+  "imagem": "Café/Rust/CT-IA-03_cafe_ferrugem.jpeg"
+ },
+ {
+  "id": "CT-IA-04",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se soja saudável é reconhecida como saudável",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Soja (SOYBEAN)",
+   "Foto: Plantas de soja saudáveis em campo"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Soja\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-04_soja_saudavel.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "SOYBEAN",
+  "classe_esperada": "Healthy",
+  "imagem": "Soja/Healthy/CT-IA-04_soja_saudavel.jpeg"
+ },
+ {
+  "id": "CT-IA-05",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem asiática da soja",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Soja (SOYBEAN)",
+   "Foto: Trifólio de soja com ferrugem (Phakopsora pachyrhizi)"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Soja\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-05_soja_ferrugem.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Rust com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "SOYBEAN",
+  "classe_esperada": "Rust",
+  "imagem": "Soja/Rust/CT-IA-05_soja_ferrugem.jpg"
+ },
+ {
+  "id": "CT-IA-06",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica o crestamento bacteriano da soja",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Soja (SOYBEAN)",
+   "Foto: Folha de soja com crestamento bacteriano (P. syringae pv. glycinea)"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Soja\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-06_soja_crestamento.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Bacterial_Blight com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "SOYBEAN",
+  "classe_esperada": "Bacterial_Blight",
+  "imagem": "Soja/Bacterial_Blight/CT-IA-06_soja_crestamento.jpg"
+ },
+ {
+  "id": "CT-IA-07",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se folha de tomate saudável é reconhecida como saudável",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Tomate (TOMATO)",
+   "Foto: Folha de tomate saudável sobre fundo claro"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Tomate\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-07_tomate_saudavel.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "TOMATO",
+  "classe_esperada": "Healthy",
+  "imagem": "Tomate/Healthy/CT-IA-07_tomate_saudavel.jpg"
+ },
+ {
+  "id": "CT-IA-08",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a mancha bacteriana do tomate",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Tomate (TOMATO)",
+   "Foto: Folha de tomate com mancha bacteriana"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Tomate\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-08_tomate_mancha_bacteriana.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Bacterial_Spot com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "TOMATO",
+  "classe_esperada": "Bacterial_Spot",
+  "imagem": "Tomate/Bacterial_Spot/CT-IA-08_tomate_mancha_bacteriana.jpg"
+ },
+ {
+  "id": "CT-IA-09",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica o mofo das folhas do tomate",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Tomate (TOMATO)",
+   "Foto: Folha de tomate com mofo (Fulvia fulva), foto de celular"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Tomate\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-09_tomate_mofo.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Leaf_Mold com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "TOMATO",
+  "classe_esperada": "Leaf_Mold",
+  "imagem": "Tomate/Leaf_Mold/CT-IA-09_tomate_mofo.jpeg"
+ },
+ {
+  "id": "CT-IA-10",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se trigo saudável é reconhecido como saudável (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Trigo (WHEAT)",
+   "Foto: Plantas de trigo saudáveis, folhas e espiga verdes"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Trigo\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-10_trigo_saudavel.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "WHEAT",
+  "classe_esperada": "Healthy",
+  "imagem": "Trigo/Healthy/CT-IA-10_trigo_saudavel.jpg"
+ },
+ {
+  "id": "CT-IA-11",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem parda do trigo (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Trigo (WHEAT)",
+   "Foto: Folha de trigo com ferrugem parda (P. recondita f.sp. tritici)"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Trigo\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-11_trigo_ferrugem_parda.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Brown_Rust com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "WHEAT",
+  "classe_esperada": "Brown_Rust",
+  "imagem": "Trigo/Brown_Rust/CT-IA-11_trigo_ferrugem_parda.jpg"
+ },
+ {
+  "id": "CT-IA-12",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem amarela do trigo (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Trigo (WHEAT)",
+   "Foto: Folha de trigo com ferrugem amarela (P. striiformis), foto de celular"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Trigo\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-12_trigo_ferrugem_amarela.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Yellow_Rust com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "WHEAT",
+  "classe_esperada": "Yellow_Rust",
+  "imagem": "Trigo/Yellow_Rust/CT-IA-12_trigo_ferrugem_amarela.jpeg"
+ },
+ {
+  "id": "CT-IA-13",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se milho saudável é reconhecido como saudável (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Planta jovem de milho saudável"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-13_milho_saudavel.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "CORN",
+  "classe_esperada": "Healthy",
+  "imagem": "Milho/Healthy/CT-IA-13_milho_saudavel.jpeg"
+ },
+ {
+  "id": "CT-IA-14",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem comum do milho (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Folha de milho com ferrugem comum (P. sorghi), foto de celular"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-14_milho_ferrugem_comum.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Rust_Common com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "CORN",
+  "classe_esperada": "Rust_Common",
+  "imagem": "Milho/Rust_Common/CT-IA-14_milho_ferrugem_comum.jpeg"
+ },
+ {
+  "id": "CT-IA-15",
+  "secao": "Capacidade: diagnóstico por cultura e classe",
+  "objetivo": "Verificar se a IA identifica a ferrugem polissora do milho (modelo v1)",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Folha de milho com ferrugem polissora (P. polysora), segurada na mão; espécie indicada pelo autor, sem confirmação da comunidade"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-15_milho_ferrugem_polissora.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Rust_Blight com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "CORN",
+  "classe_esperada": "Rust_Blight",
+  "imagem": "Milho/Rust_Blight/CT-IA-15_milho_ferrugem_polissora.jpg"
+ },
+ {
+  "id": "CT-IA-16",
+  "secao": "Erro do cliente: cultura errada selecionada",
+  "objetivo": "Verificar o que acontece quando o cliente envia folha de café com a cultura Soja selecionada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Soja (SOYBEAN)",
+   "Foto: Mesma foto do CT-IA-03 (café com ferrugem), enviada como Soja"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Soja\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-03_cafe_ferrugem.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "SOYBEAN",
+  "classe_esperada": null,
+  "imagem": "Café/Rust/CT-IA-03_cafe_ferrugem.jpeg"
+ },
+ {
+  "id": "CT-IA-17",
+  "secao": "Erro do cliente: cultura errada selecionada",
+  "objetivo": "Verificar o que acontece quando o cliente envia folha de milho com a cultura Trigo selecionada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Trigo (WHEAT)",
+   "Foto: Mesma foto do CT-IA-14 (milho com ferrugem), enviada como Trigo"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Trigo\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-14_milho_ferrugem_comum.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "WHEAT",
+  "classe_esperada": null,
+  "imagem": "Milho/Rust_Common/CT-IA-14_milho_ferrugem_comum.jpeg"
+ },
+ {
+  "id": "CT-IA-18",
+  "secao": "Erro do cliente: cultura errada selecionada",
+  "objetivo": "Verificar o que acontece quando o cliente envia folha de tomate com a cultura Milho selecionada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Mesma foto do CT-IA-07 (tomate saudável), enviada como Milho"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-07_tomate_saudavel.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "CORN",
+  "classe_esperada": null,
+  "imagem": "Tomate/Healthy/CT-IA-07_tomate_saudavel.jpg"
+ },
+ {
+  "id": "CT-IA-19",
+  "secao": "Capacidade: problema fora do catálogo do modelo",
+  "objetivo": "Verificar a resposta para requeima do tomate, doença que o modelo não conhece",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Tomate (TOMATO)",
+   "Foto: Folha de tomate com requeima (Phytophthora infestans)"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Tomate\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-19_tomate_requeima.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "TOMATO",
+  "classe_esperada": null,
+  "imagem": "_Outros/Fora_do_Catalogo/CT-IA-19_tomate_requeima.jpg"
+ },
+ {
+  "id": "CT-IA-20",
+  "secao": "Capacidade: problema fora do catálogo do modelo",
+  "objetivo": "Verificar a resposta para cercosporiose do milho, doença que o modelo não conhece",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Folha de milho com cercosporiose (gray leaf spot)"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-20_milho_cercosporiose.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "CORN",
+  "classe_esperada": null,
+  "imagem": "_Outros/Fora_do_Catalogo/CT-IA-20_milho_cercosporiose.jpg"
+ },
+ {
+  "id": "CT-IA-21",
+  "secao": "Capacidade: problema fora do catálogo do modelo",
+  "objetivo": "Verificar a resposta para cercosporiose do café, doença que o modelo não conhece",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha de café com Cercospora coffeicola, foto de celular"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-21_cafe_cercospora.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "COFFEE",
+  "classe_esperada": null,
+  "imagem": "_Outros/Fora_do_Catalogo/CT-IA-21_cafe_cercospora.jpg"
+ },
+ {
+  "id": "CT-IA-22",
+  "secao": "Capacidade: problema fora do catálogo do modelo",
+  "objetivo": "Verificar a resposta para folha de soja com manchas claras que não são ferrugem nem crestamento",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Soja (SOYBEAN)",
+   "Foto: Trifólio de soja com manchas claras de causa não identificada na fonte"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Soja\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-22_soja_manchas_claras.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "SOYBEAN",
+  "classe_esperada": null,
+  "imagem": "_Outros/Fora_do_Catalogo/CT-IA-22_soja_manchas_claras.jpg"
+ },
+ {
+  "id": "CT-IA-23",
+  "secao": "Erro do cliente: foto que não é de folha",
+  "objetivo": "Verificar se a espiga de milho é recusada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Espiga de milho descascada segurada na mão"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-23_espiga_de_milho.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A triagem recusa a foto (422) e o cliente recebe a mensagem pedindo outra foto; nenhum diagnóstico é gerado.",
+  "criterio": "recusa_triagem",
+  "cultura": "CORN",
+  "classe_esperada": null,
+  "imagem": "_Outros/Nao_e_Folha/CT-IA-23_espiga_de_milho.jpg"
+ },
+ {
+  "id": "CT-IA-24",
+  "secao": "Erro do cliente: foto que não é de folha",
+  "objetivo": "Verificar se grãos de café são recusados",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Grãos de café torrados em uma tigela"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-24_graos_de_cafe.png → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A triagem recusa a foto (422) e o cliente recebe a mensagem pedindo outra foto; nenhum diagnóstico é gerado.",
+  "criterio": "recusa_triagem",
+  "cultura": "COFFEE",
+  "classe_esperada": null,
+  "imagem": "_Outros/Nao_e_Folha/CT-IA-24_graos_de_cafe.png"
+ },
+ {
+  "id": "CT-IA-25",
+  "secao": "Erro do cliente: foto que não é de folha",
+  "objetivo": "Verificar se a espiga de trigo é recusada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Trigo (WHEAT)",
+   "Foto: Espiga verde de trigo segurada na mão"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Trigo\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-25_espiga_de_trigo.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A triagem recusa a foto (422) e o cliente recebe a mensagem pedindo outra foto; nenhum diagnóstico é gerado.",
+  "criterio": "recusa_triagem",
+  "cultura": "WHEAT",
+  "classe_esperada": null,
+  "imagem": "_Outros/Nao_e_Folha/CT-IA-25_espiga_de_trigo.jpeg"
+ },
+ {
+  "id": "CT-IA-26",
+  "secao": "Erro do cliente: foto que não é de folha",
+  "objetivo": "Verificar se folha seca de outra espécie é recusada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha seca de bordo segurada na mão, enviada como Café"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-26_folha_seca_de_bordo.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A triagem recusa a foto (422) e o cliente recebe a mensagem pedindo outra foto; nenhum diagnóstico é gerado.",
+  "criterio": "recusa_triagem",
+  "cultura": "COFFEE",
+  "classe_esperada": null,
+  "imagem": "_Outros/Nao_e_Folha/CT-IA-26_folha_seca_de_bordo.jpg"
+ },
+ {
+  "id": "CT-IA-27",
+  "secao": "Erro do cliente: foto que não é de folha",
+  "objetivo": "Verificar se a foto da lavoura inteira é recusada",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Milho (CORN)",
+   "Foto: Lavoura de milho vista de longe, sem nenhuma folha em destaque"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Milho\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-27_lavoura_de_milho.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A triagem recusa a foto (422) e o cliente recebe a mensagem pedindo outra foto; nenhum diagnóstico é gerado.",
+  "criterio": "recusa_triagem",
+  "cultura": "CORN",
+  "classe_esperada": null,
+  "imagem": "_Outros/Nao_e_Folha/CT-IA-27_lavoura_de_milho.jpg"
+ },
+ {
+  "id": "CT-IA-28",
+  "secao": "Erro do cliente: enquadramento da foto",
+  "objetivo": "Verificar se a mão segurando a folha atrapalha o diagnóstico",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Folha de café com ferrugem segurada entre os dedos, fundo escuro"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-28_cafe_ferrugem_na_mao.jpeg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Rust com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "COFFEE",
+  "classe_esperada": "Rust",
+  "imagem": "Café/Rust/CT-IA-28_cafe_ferrugem_na_mao.jpeg"
+ },
+ {
+  "id": "CT-IA-29",
+  "secao": "Erro do cliente: enquadramento da foto",
+  "objetivo": "Verificar a resposta quando o cliente fotografa o pé inteiro de longe",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Cafeeiro inteiro em campo aberto, folhas pequenas na foto"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-29_cafeeiro_de_longe.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA não entrega diagnóstico confiante ao cliente: recusa a foto na triagem ou responde com confiança < 80% (o backend então pede nova foto).",
+  "criterio": "sem_diagnostico_confiante",
+  "cultura": "COFFEE",
+  "classe_esperada": null,
+  "imagem": "_Outros/Enquadramento/CT-IA-29_cafeeiro_de_longe.jpg"
+ },
+ {
+  "id": "CT-IA-30",
+  "secao": "Erro do cliente: enquadramento da foto",
+  "objetivo": "Verificar se folhas fotografadas contra o céu são reconhecidas",
+  "precondicoes": "API da IA em execução com os modelos reais e a triagem ativa",
+  "dados": [
+   "Cultura: Café (COFFEE)",
+   "Foto: Ramo de café com folhas sem sintomas contra o céu"
+  ],
+  "passos": [
+   "Abrir a tela de nova análise → Seletor de cultura e campo de foto exibidos",
+   "Selecionar a cultura \"Café\" → Cultura exibida como selecionada",
+   "Enviar a foto CT-IA-30_cafe_contra_o_ceu.jpg → Prévia da foto exibida",
+   "Clicar em \"Analisar\" → Sistema processa a foto e mostra o resultado ou a orientação"
+  ],
+  "esperado": "A IA aceita a foto e devolve a classe Healthy com confiança ≥ 80% (limite a partir do qual o backend exibe o diagnóstico ao cliente).",
+  "criterio": "diagnostico",
+  "cultura": "COFFEE",
+  "classe_esperada": "Healthy",
+  "imagem": "Café/Healthy/CT-IA-30_cafe_contra_o_ceu.jpg"
+ }
+]

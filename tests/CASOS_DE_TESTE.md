@@ -182,6 +182,12 @@ Precisam do HD de dados. O caminho padrão é `/media/kaua-matheus/HD3201/Data/A
 
 ---
 
+## 4. Testes manuais com fotos reais (`manual/`)
+
+30 cenários do ponto de vista do cliente (cultura errada, doença fora do catálogo, foto que não é de folha, enquadramento), com fotos de fora dos conjuntos de treino. Especificação em `Casos_de_Teste_Agroscope_IA.xlsx`, na raiz; resultados em [`manual/RELATORIO.md`](manual/RELATORIO.md). Não rodam no `pytest`: use `python tests/manual/executar_casos.py "<pasta das imagens>" <URL da API>`. As imagens ficam fora do Git, na pasta `Caso Testes Agroscope` do HD, separadas em `<Cultura>/<Classe>/` e `_Outros/` (fontes e licenças em `manual/imagens/FONTES.csv`).
+
+---
+
 ## Decisões registradas nos testes
 
 - **Imagem inválida ou corrompida devolve 400** (e não 415), igual à API antiga, para não quebrar o front.
