@@ -97,6 +97,27 @@ Foto da folha  →  Recorte da folha  →  Modelo de IA  →  Resultado
 
 **Decisão:** a triagem fica ativa na aplicação. A foto escura não é mais motivo de recusa (medimos que não atrapalha o diagnóstico).
 
+### Nov/2026 — Laboratório multi-doença (café)
+
+**Pergunta:** um modelo consegue apontar **várias doenças na mesma folha** e mostrar onde está cada uma?
+
+**O que foi feito** ([`MultiDisease/lab.ipynb`](MultiDisease/lab.ipynb)):
+- **Dados:** base pública **BRACOL** (café arábica, licença MIT), que marca cada doença separadamente: bicho-mineiro, ferrugem, Phoma e cercosporiose. 372 folhas reais têm mais de uma doença.
+- **Combinações raras:** lesões reais "coladas" em outras folhas (copy-paste).
+- **Modelo leve:** MobileNetV3, com 4,2 M de parâmetros e 16 MB, contra 106 MB do ConvNeXt.
+- **Localização:** um mapa de calor para cada doença.
+
+**Resultado (435 folhas de teste):**
+- todas as doenças da folha certas, sem nenhuma a mais: 78%;
+- folhas saudáveis sem nenhuma doença apontada: 98,5%;
+- folhas com 2+ doenças em que todas foram encontradas: 58–72%, conforme a execução;
+- o mapa aponta para a lesão da doença certa 6,7× mais que um chute;
+- a cercosporiose é a doença mais difícil.
+
+**Decisão:** o modelo foi salvo como `Models/Saved/Expert/Coffee/coffee_multi.pth`, à parte dos modelos de uma doença. As "Phoma" do BRACOL e do projeto parecem ser sintomas diferentes; um agrônomo precisa conferir antes de juntar as bases.
+
+**Achado:** o `utils/leaf.py` corta a metade verde-escura da folha em 8,7% das fotos de teste do café. Ver a seção de limitações.
+
 ---
 
 ## Estudos e decisões
@@ -212,6 +233,7 @@ Pontos de atenção:
 | `utils/leaf.py` | Recorte automático da folha |
 | `utils/inference.py` | Versão de laboratório do diagnóstico completo (a aplicação usa a sua própria cópia em `Main/Project/IA/core/`) |
 | `gate_lab/` | Experimento e treino do modelo de triagem (folha / não-folha / qualidade) |
+| `MultiDisease/` | Laboratório multi-doença: várias doenças na mesma folha e onde está cada uma (base BRACOL) |
 | `Models/Saved/Expert/` | Modelos treinados, um por cultura (não vai para o Git) |
 | `.env` | Caminhos das pastas de dados e do modelo (não vai para o Git) |
 
@@ -222,6 +244,7 @@ Pontos de atenção:
 - **Fotos de campo** (folha no pé, fundo com outras folhas e terra) ainda são o ponto fraco: no café, cerca de 75–80% de acerto, contra ~98% nas fotos com fundo claro. A solução é **juntar mais fotos de campo** para o treino.
 - **O teste externo do café** vem quase todo de uma mesma sessão de fotos. Um resultado de 98% aqui não garante o mesmo em outras fazendas.
 - **Trigo, tomate e milho** ainda não foram retreinados com o método novo (a aplicação usa os modelos antigos com o preparo antigo).
+- **O recorte da folha (`utils/leaf.py`) corta a metade verde-escura da folha em 8,7% das fotos de teste do café** (15% nas de Phoma). O limiar automático de saturação sobe demais quando metade da folha é muito saturada. A correção (limiar fixo + filtro de cor) está em `MultiDisease/multi_utils.py` (`Leaf_BBox_Background`); aplicá-la ao modelo principal exige retreiná-lo.
 - **A triagem não confere a cultura**: uma folha de outra planta é diagnosticada como se fosse da cultura escolhida.
 
 ---
